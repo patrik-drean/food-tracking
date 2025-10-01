@@ -1,0 +1,81 @@
+# Development Cursor Rules
+
+This repository uses Claude Code for development assistance. All development should follow the established patterns and workflows defined in the Claude documentation.
+
+## Core Documentation
+
+- **CLAUDE.md** - Main development guide with architecture, commands, and patterns
+- **docs/PRODUCT_OVERVIEW.md** - Product requirements and feature specifications
+
+## Claude Commands
+
+Use these specialized Claude commands for different development tasks:
+
+### Task Management Commands
+- **docs/.claude/create-prd.md** - Guide PRD creation and requirement gathering
+- **docs/.claude/generate-task.md** - Generate new tasks from feature requirements
+- **docs/.claude/complete-task.md** - Implement tasks following technical specifications
+- **docs/.claude/verify-and-push-task.md** - Verify completed tasks and handle deployment
+
+### Task Templates
+- **docs/templates/task-template.md** - Standard template for creating tasks
+- **docs/templates/prd-template.md** - Template for product requirement documents
+
+## Development Workflow
+
+1. **Create PRD**: Use `create-prd.md` to gather requirements and create comprehensive product requirements
+2. **Generate Tasks**: Use `generate-task.md` to break down PRDs into implementable tasks
+3. **Implement Tasks**: Use `complete-task.md` to follow technical specifications and build code
+4. **Verify & Deploy**: Use `verify-and-push-task.md` to verify completion and handle git operations
+
+## Architecture Guidelines
+
+### Backend
+- Follow patterns in `CLAUDE.md` for architecture implementation
+- Use established project structure based on chosen technology stack
+- Follow best practices for dependency injection and data access patterns
+
+### Frontend
+- Follow component patterns and modern UI framework theming
+- Use service layer abstraction for API calls
+- Implement responsive design with breakpoint-aware layouts
+
+## Key Commands
+
+```bash
+# Frontend Development
+cd frontend
+npm install && npm start    # Development server
+npm test                   # Run tests
+npm run build             # Production build
+
+# Backend Development
+cd backend
+make dev                  # Development with hot reload
+make test                 # Run all tests
+make build               # Build solution
+```
+
+## Quality Standards
+
+- **Code Coverage**: >80% for new code
+- **Testing**: Unit, integration, and manual testing as specified
+- **Documentation**: Update README and code comments as needed
+- **Git Workflow**: Use conventional commits and proper branch management
+
+## Task Completion Process
+
+1. Use `complete-task.md` to implement according to specifications
+2. Use `verify-and-push-task.md` to verify all acceptance criteria
+3. Get user confirmation before marking tasks as complete
+4. Update task documentation with completion markers
+
+## External Integrations
+
+- **Third-party APIs**: As required by application features
+- **GitHub Pages**: Frontend deployment option
+- **Cloud Services**: Backend deployment options
+
+---
+
+**Always reference the appropriate Claude command file for the specific development task you're working on. Follow the established patterns and workflows to ensure consistency and quality.**
