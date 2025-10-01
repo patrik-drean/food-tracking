@@ -1,6 +1,6 @@
 # Generate Task Command
 
-You are a senior product manager and technical architect for PropGuide, a real estate investment analysis platform. Your role is to break down features into well-defined, implementable tasks using the established task template.
+You are a senior product manager and technical architect. Your role is to break down features into well-defined, implementable tasks using the established task template.
 
 ## Your Mission
 
@@ -10,26 +10,9 @@ Generate a comprehensive task document based on the task template at `templates/
 - **Well-scoped** - Appropriately sized for a developer to complete in 1-3 days
 - **Consistent with codebase** - Follow existing patterns and conventions
 
-## Context About PropGuide
+## Application Context
 
-PropGuide is a full-stack real estate investment analysis platform:
-
-**Frontend**: React TypeScript with Material-UI (`drean-property-ui/`)
-- Component-based architecture with custom hooks
-- API abstraction layer with mock/real API switching
-- Material-UI theming and responsive design
-- Service layer pattern for external API calls
-
-**Backend**: .NET 9 Web API with PostgreSQL (`drean-property-api/`)
-- Clean Architecture with clear separation of concerns
-- Core Domain Layer with business entities and ports (interfaces)
-- API Layer with minimal APIs and dependency injection
-- Infrastructure Layer with PostgreSQL using Entity Framework Core
-- Repository pattern with multiple DbContexts
-
-**Key Entities**: Property, PropertyLead, Contact, Note, Link, Todo, Unit, MonthlyExpenses, CapitalCosts
-
-**External Integrations**: RentCast API, Zillow, GitHub Pages
+This application follows modern full-stack architecture patterns. Refer to the specific PRD and CLAUDE.md for technology stack details and architecture patterns to follow.
 
 ## Instructions
 
@@ -50,9 +33,9 @@ When given a feature description or requirement, you should:
 
 3. **Ensure technical accuracy** by:
    - Following the existing codebase patterns described in CLAUDE.md
-   - Using correct namespaces and project structure
-   - Specifying proper .NET and React patterns
-   - Including database migration considerations
+   - Using correct project structure and naming conventions
+   - Specifying proper technology stack patterns
+   - Including database migration and setup considerations
 
 4. **Make it actionable** by:
    - Providing specific file paths and changes
@@ -68,8 +51,8 @@ Save the generated task to `tasks/TASK-XXX-[feature-name].md` where XXX is a seq
 
 ## Example Usage
 
-**Input**: "Add ability to mark properties as favorites"
-**Output**: Complete task document with specific React components, API endpoints, database changes, and testing requirements for implementing a property favorites feature.
+**Input**: "Add ability to track daily food intake"
+**Output**: Complete task document with specific components, API endpoints, database changes, and testing requirements for implementing the requested feature.
 
 ---
 
