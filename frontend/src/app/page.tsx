@@ -12,6 +12,7 @@ export default function HomePage() {
           Track your daily nutrition with AI-powered food analysis.
           Simply describe what you eat and get instant nutrition insights.
         </p>
+        {/* Ready for production deployment */}
       </div>
 
       {/* Quick Actions */}
