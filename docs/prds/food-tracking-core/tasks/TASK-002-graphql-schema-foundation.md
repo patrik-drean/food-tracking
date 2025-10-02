@@ -29,28 +29,27 @@ This task builds the GraphQL API foundation that the frontend will consume. Focu
 #### Backend Changes
 - **Schema Definition**:
   - `backend/src/schema/index.ts` - Main schema export
+  - `backend/src/schema/builder.ts` - Pothos builder configuration
   - `backend/src/schema/types/Food.ts` - Food type definition
-  - `backend/src/schema/types/index.ts` - Type exports
-- **Resolvers**:
-  - `backend/src/resolvers/food.ts` - Food queries and mutations
-  - `backend/src/resolvers/index.ts` - Resolver exports
+  - `backend/src/schema/types/Query.ts` - Query resolvers
+  - `backend/src/schema/types/Mutation.ts` - Mutation resolvers
 - **Services**:
   - `backend/src/services/foodService.ts` - Business logic layer
-  - `backend/src/lib/prisma.ts` - Prisma client configuration
+  - `backend/src/lib/prisma.ts` - Prisma client configuration (already exists)
 - **Server Setup**:
-  - `backend/src/server.ts` - GraphQL Yoga server configuration
-  - `backend/src/index.ts` - Application entry point
+  - `backend/src/index.ts` - GraphQL Yoga server configuration (already exists)
 
 #### Configuration Changes
-- **Environment Variables**: DATABASE_URL for Prisma connection
-- **Dependencies**: Add @pothos/plugin-prisma for Prisma integration
-- **Scripts**: Add database setup and generation commands
+- **Environment Variables**: DATABASE_URL already configured in `.env`
+- **Dependencies**: Add @pothos/plugin-prisma and related packages
+- **Database**: Prisma schema and client already set up from TASK-001
+- **Scripts**: Prisma generation already configured in package.json
 
 ### Implementation Details
 
 #### Pothos Schema Builder Setup
 ```typescript
-// backend/src/schema/index.ts
+// backend/src/schema/builder.ts
 import SchemaBuilder from '@pothos/core';
 import PrismaPlugin from '@pothos/plugin-prisma';
 import type PrismaTypes from '@pothos/plugin-prisma/generated';
@@ -65,18 +64,38 @@ export const builder = new SchemaBuilder<{
   },
 });
 
+// DateTime scalar for Prisma dates
+builder.scalarType('DateTime', {
+  serialize: (date) => date.toISOString(),
+  parseValue: (value) => {
+    if (typeof value === 'string') {
+      return new Date(value);
+    }
+    throw new Error('Invalid date value');
+  },
+});
+```
+
+```typescript
+// backend/src/schema/index.ts
+import { builder } from './builder';
+
 // Import all type definitions
-import './types';
+import './types/Food';
+import './types/Query';
+import './types/Mutation';
 
 export const schema = builder.toSchema();
+export { builder };
 ```
 
 #### Food Type Definition
 ```typescript
 // backend/src/schema/types/Food.ts
-import { builder } from '../index';
+import { builder } from '../builder';
 
-builder.prismaObject('Food', {
+builder.prismaObject('FoodLogEntry', {
+  name: 'Food',
   fields: (t) => ({
     id: t.exposeID('id'),
     description: t.exposeString('description'),
@@ -85,6 +104,7 @@ builder.prismaObject('Food', {
     carbs: t.exposeFloat('carbs', { nullable: true }),
     protein: t.exposeFloat('protein', { nullable: true }),
     isManual: t.exposeBoolean('isManual'),
+    logDate: t.expose('logDate', { type: 'DateTime' }),
     createdAt: t.expose('createdAt', { type: 'DateTime' }),
   }),
 });
@@ -117,7 +137,7 @@ const UpdateFoodNutritionInput = builder.inputType('UpdateFoodNutritionInput', {
 #### Query Resolvers
 ```typescript
 // backend/src/schema/types/Query.ts
-import { builder } from '../index';
+import { builder } from '../builder';
 import { foodService } from '../../services/foodService';
 
 builder.queryType({
@@ -144,7 +164,7 @@ builder.queryType({
 #### Mutation Resolvers
 ```typescript
 // backend/src/schema/types/Mutation.ts
-import { builder } from '../index';
+import { builder } from '../builder';
 import { foodService } from '../../services/foodService';
 
 builder.mutationType({
@@ -175,7 +195,23 @@ builder.mutationType({
 ```typescript
 // backend/src/services/foodService.ts
 import { prisma } from '../lib/prisma';
-import type { AddFoodInput, UpdateFoodNutritionInput } from '../schema/types';
+
+interface NutritionInput {
+  calories?: number | null;
+  fat?: number | null;
+  carbs?: number | null;
+  protein?: number | null;
+}
+
+interface AddFoodInput {
+  description: string;
+  nutrition?: NutritionInput | null;
+}
+
+interface UpdateFoodNutritionInput {
+  id: string;
+  nutrition: NutritionInput;
+}
 
 export const foodService = {
   async getTodaysFoods() {
@@ -184,9 +220,9 @@ export const foodService = {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    return prisma.food.findMany({
+    return prisma.foodLogEntry.findMany({
       where: {
-        createdAt: {
+        logDate: {
           gte: today,
           lt: tomorrow,
         },
@@ -198,7 +234,7 @@ export const foodService = {
   },
 
   async getRecentFoods(limit: number = 10) {
-    return prisma.food.findMany({
+    return prisma.foodLogEntry.findMany({
       take: limit,
       orderBy: {
         createdAt: 'desc',
@@ -210,7 +246,7 @@ export const foodService = {
   async addFood(input: AddFoodInput) {
     const { description, nutrition } = input;
 
-    return prisma.food.create({
+    return prisma.foodLogEntry.create({
       data: {
         description,
         calories: nutrition?.calories,
@@ -218,6 +254,7 @@ export const foodService = {
         carbs: nutrition?.carbs,
         protein: nutrition?.protein,
         isManual: !!nutrition, // True if nutrition provided manually
+        logDate: new Date(),
       },
     });
   },
@@ -225,7 +262,7 @@ export const foodService = {
   async updateFoodNutrition(input: UpdateFoodNutritionInput) {
     const { id, nutrition } = input;
 
-    return prisma.food.update({
+    return prisma.foodLogEntry.update({
       where: { id },
       data: {
         calories: nutrition.calories,
@@ -236,30 +273,92 @@ export const foodService = {
       },
     });
   },
+
+  async getFoodsByDate(date: string) {
+    const targetDate = new Date(date);
+    targetDate.setHours(0, 0, 0, 0);
+    const nextDate = new Date(targetDate);
+    nextDate.setDate(nextDate.getDate() + 1);
+
+    return prisma.foodLogEntry.findMany({
+      where: {
+        logDate: {
+          gte: targetDate,
+          lt: nextDate,
+        },
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+  },
 };
 ```
 
-#### GraphQL Yoga Server Setup
-```typescript
-// backend/src/server.ts
-import { createYoga } from 'graphql-yoga';
-import { createServer } from 'http';
-import { schema } from './schema';
+#### Integration with Existing Server
+The GraphQL schema will be integrated into the existing `backend/src/index.ts` server:
 
+```typescript
+// Update backend/src/index.ts
+import { createYoga } from 'graphql-yoga'
+import { createServer } from 'node:http'
+import { schema } from './schema'  // Add this import
+import { prisma } from './lib/prisma'
+import dotenv from 'dotenv'
+
+// Load environment variables
+dotenv.config()
+
+// Create GraphQL Yoga server
 const yoga = createYoga({
-  schema,
+  schema,  // Use the new schema
+  context: async () => ({
+    prisma,
+  }),
   cors: {
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true,
   },
   graphiql: {
     title: 'Food Tracking API',
+    defaultQuery: `
+query GetTodaysFoods {
+  todaysFoods {
+    id
+    description
+    calories
+    protein
+    carbs
+    fat
+    isManual
+    logDate
+    createdAt
+  }
+}
+
+mutation AddFood {
+  addFood(input: {
+    description: "1 medium apple"
+    nutrition: {
+      calories: 95
+      protein: 0.5
+      carbs: 25
+      fat: 0.3
+    }
+  }) {
+    id
+    description
+    calories
+    protein
+    carbs
+    fat
+    isManual
+    logDate
+    createdAt
+  }
+}`,
   },
-});
-
-const server = createServer(yoga);
-
-export { server, yoga };
+})
 ```
 
 #### Prisma Client Configuration
@@ -327,20 +426,160 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
   - Validate date filtering and sorting logic
 
 ### Manual Testing Scenarios
+
+#### Prerequisites
+1. Ensure backend is running locally
+2. Database is set up with Prisma migrations
+3. Environment variables are configured
+
+#### Running the API Locally
+```bash
+# From the project root
+cd backend
+
+# Install dependencies (if not done)
+npm install
+
+# Add required Pothos dependencies
+npm install @pothos/core @pothos/plugin-prisma
+
+# Generate Prisma client and Pothos types
+npx prisma generate
+
+# Run database migrations (if needed)
+npx prisma migrate dev
+
+# Start the development server
+npm run dev
+```
+
+The GraphQL server will be available at:
+- **GraphQL Endpoint**: `http://localhost:4000/graphql`
+- **GraphiQL Playground**: `http://localhost:4000/graphql` (same URL, opens in browser)
+
+#### Testing with cURL Commands
+
+**1. Test Server Health**
+```bash
+# Basic introspection query to verify server is running
+curl -X POST http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "{ __schema { queryType { name } } }"
+  }'
+```
+
+**2. Test Today's Foods Query**
+```bash
+# Query for today's food entries
+curl -X POST http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "query { todaysFoods { id description calories protein carbs fat isManual logDate createdAt } }"
+  }'
+```
+
+**3. Test Add Food Mutation (with nutrition)**
+```bash
+# Add a food entry with complete nutrition data
+curl -X POST http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation { addFood(input: { description: \"1 medium apple\", nutrition: { calories: 95, protein: 0.5, carbs: 25, fat: 0.3 } }) { id description calories protein carbs fat isManual logDate createdAt } }"
+  }'
+```
+
+**4. Test Add Food Mutation (description only)**
+```bash
+# Add a food entry without nutrition data
+curl -X POST http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation { addFood(input: { description: \"chicken breast\" }) { id description calories protein carbs fat isManual logDate createdAt } }"
+  }'
+```
+
+**5. Test Recent Foods Query**
+```bash
+# Query for recent food suggestions
+curl -X POST http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "query { recentFoods(limit: 5) { id description calories protein carbs fat logDate createdAt } }"
+  }'
+```
+
+**6. Test Update Food Nutrition**
+```bash
+# Update nutrition for existing food (replace ID with actual ID from previous queries)
+curl -X POST http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation { updateFoodNutrition(input: { id: \"FOOD_ID_HERE\", nutrition: { calories: 120, protein: 1.0, carbs: 30, fat: 0.5 } }) { id description calories protein carbs fat isManual logDate } }"
+  }'
+```
+
+#### Expected Responses
+
+**Successful Query Response:**
+```json
+{
+  "data": {
+    "todaysFoods": [
+      {
+        "id": "cm1234567890",
+        "description": "1 medium apple",
+        "calories": 95,
+        "protein": 0.5,
+        "carbs": 25,
+        "fat": 0.3,
+        "isManual": true,
+        "logDate": "2024-10-02T00:00:00.000Z",
+        "createdAt": "2024-10-02T10:30:00.000Z"
+      }
+    ]
+  }
+}
+```
+
+**Error Response Example:**
+```json
+{
+  "errors": [
+    {
+      "message": "Field \"invalidField\" is not defined by type \"Food\".",
+      "locations": [{ "line": 1, "column": 50 }]
+    }
+  ]
+}
+```
+
+#### Validation Tests
 1. **GraphiQL Playground**: Test all queries and mutations manually
 2. **Data Validation**: Verify nullable fields work correctly
 3. **Error Handling**: Test invalid inputs and database errors
 4. **Performance**: Check query efficiency with sample data
+5. **CORS**: Verify frontend can make requests from localhost:3000
 
 ## Implementation Notes
 
+### Required Dependencies
+First, install the required Pothos dependencies in the backend:
+
+```bash
+cd backend
+npm install @pothos/core @pothos/plugin-prisma
+npm install -D @pothos/plugin-prisma
+```
+
 ### Development Approach
-1. **Step 1**: Set up Pothos builder with Prisma plugin
-2. **Step 2**: Define Food type and input types
+1. **Step 1**: Install Pothos dependencies and set up builder with Prisma plugin
+2. **Step 2**: Define Food type and input types following existing schema
 3. **Step 3**: Implement service layer with Prisma operations
 4. **Step 4**: Create query and mutation resolvers
-5. **Step 5**: Configure GraphQL Yoga server with CORS
-6. **Step 6**: Test full schema with GraphiQL playground
+5. **Step 5**: Update existing GraphQL Yoga server configuration
+6. **Step 6**: Test schema with GraphiQL playground and cURL commands
+7. **Step 7**: Verify integration with existing database and server setup
 
 ### Learning Focus Areas
 - **Code-First GraphQL**: Pothos schema building vs schema-first approaches
@@ -363,18 +602,25 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 - [ ] Type safety verified throughout the stack
 - [ ] Error handling implemented for common failure cases
 - [ ] CORS configured for frontend development
+- [ ] All cURL test commands execute successfully
+- [ ] Integration with existing server setup verified
+- [ ] Database operations work with existing Prisma configuration
 
 ### Documentation Complete
 - [ ] GraphQL schema documented with descriptions
 - [ ] Service methods have proper JSDoc comments
-- [ ] README updated with GraphQL endpoint information
-- [ ] Environment variables documented
+- [ ] Local testing instructions verified and working
+- [ ] cURL command examples tested and documented
+- [ ] GraphiQL playground usage documented
+- [ ] Environment variables documented (DATABASE_URL already configured)
 
 ### Deployment Ready
-- [ ] Database connection configured via environment variables
+- [ ] Database connection uses existing environment configuration
 - [ ] GraphQL endpoint accessible from frontend
-- [ ] Prisma client generation working in build process
-- [ ] Server starts successfully with proper error logging
+- [ ] Prisma client generation integrated with existing build process
+- [ ] Server starts successfully with new schema
+- [ ] Railway deployment works with updated schema
+- [ ] GitHub Pages frontend can connect to backend API
 
 ## Related Tasks
 
