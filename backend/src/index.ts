@@ -57,14 +57,25 @@ mutation AddFood {
 // Create HTTP server
 const server = createServer(yoga)
 
-// Get port from environment or use default
-const port = process.env.PORT || 4000
+// Get port and host from environment
+const port = parseInt(process.env.PORT || '4000', 10)
+const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost'
 
 // Start server
-server.listen(port, () => {
-  console.log(`🚀 GraphQL Yoga server is running on http://localhost:${port}/graphql`)
-  console.log(`📊 GraphiQL playground available at http://localhost:${port}/graphql`)
+server.listen(port, host, () => {
+  console.log(`🚀 GraphQL Yoga server is running on http://${host}:${port}/graphql`)
+  console.log(`📊 GraphiQL playground available at http://${host}:${port}/graphql`)
   console.log(`🔗 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`)
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`)
+  console.log(`🔌 Database: ${process.env.DATABASE_URL ? 'Connected' : 'Not configured'}`)
+  console.log(`🏥 Health check endpoint ready at http://${host}:${port}/graphql`)
+
+  // Test database connection on startup
+  if (process.env.NODE_ENV === 'production') {
+    prisma.$connect()
+      .then(() => console.log('✅ Database connection verified'))
+      .catch((err) => console.error('❌ Database connection failed:', err))
+  }
 })
 
 // Graceful shutdown
