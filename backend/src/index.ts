@@ -21,7 +21,7 @@ const yoga = createYoga({
     title: 'Food Tracking API',
     defaultQuery: `
 query GetTodaysFoods {
-  foodsByDate(date: "${new Date().toISOString().split('T')[0]}") {
+  todaysFoods {
     id
     description
     calories
@@ -30,17 +30,19 @@ query GetTodaysFoods {
     fat
     isManual
     createdAt
+    updatedAt
   }
 }
 
 mutation AddFood {
   addFood(input: {
     description: "1 medium apple"
-    calories: 95
-    protein: 0.5
-    carbs: 25
-    fat: 0.3
-    isManual: true
+    nutrition: {
+      calories: 95
+      protein: 0.5
+      carbs: 25
+      fat: 0.3
+    }
   }) {
     id
     description
@@ -48,7 +50,9 @@ mutation AddFood {
     protein
     carbs
     fat
+    isManual
     createdAt
+    updatedAt
   }
 }`,
   },

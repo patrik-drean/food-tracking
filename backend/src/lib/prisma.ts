@@ -2,7 +2,8 @@ import { PrismaClient } from '@prisma/client'
 
 // Global Prisma client instance to prevent multiple connections in development
 declare global {
-  var __prisma: PrismaClient | undefined
+  // eslint-disable-next-line no-var, no-unused-vars
+  var __prisma: PrismaClient | undefined;
 }
 
 export const prisma =

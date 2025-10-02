@@ -1,4 +1,9 @@
-import { builder } from './builder'
+import { builder } from './builder';
 
-// Build and export the schema (basic schema for now)
-export const schema = builder.toSchema()
+// Import all type definitions
+import './types/Food';
+import './types/Query';
+import './types/Mutation';
+
+export const schema = builder.toSchema();
+export { builder };
