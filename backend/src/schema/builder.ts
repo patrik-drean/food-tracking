@@ -16,7 +16,7 @@ builder.queryType({
       resolve: async () => {
         try {
           // Basic connection test
-          const { prisma } = await import('@/lib/prisma')
+          const { prisma } = await import('../lib/prisma')
           await prisma.$queryRaw`SELECT 1`
           return 'Database connected successfully to Railway PostgreSQL'
         } catch (error) {
