@@ -1,103 +1,71 @@
-import Link from 'next/link'
-import { GraphQLTest } from '@/components/GraphQLTest'
+import { AppLayout } from '@/components/layout/AppLayout';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 
 export default function HomePage() {
   return (
-    <div className="space-y-8">
-      {/* Welcome Section */}
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Welcome to Food Tracker
-        </h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Track your daily nutrition with AI-powered food analysis.
-          Simply describe what you eat and get instant nutrition insights.
-        </p>
-        {/* Ready for production deployment */}
-      </div>
+    <AppLayout>
+      <div className="space-y-6">
+        {/* Page Header */}
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Today&apos;s Food Log
+          </h2>
+          <p className="text-gray-600">
+            Track your nutrition and stay on top of your goals
+          </p>
+        </div>
 
-      {/* Quick Actions */}
-      <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-        <div className="card">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+        {/* Nutrition Summary Card */}
+        <Card>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Daily Summary
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <p className="text-sm text-gray-500 mb-1">Calories</p>
+              <p className="text-2xl font-bold text-nutrition-calories">0</p>
+              <p className="text-xs text-gray-400">/ 2000 goal</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-1">Protein</p>
+              <p className="text-2xl font-bold text-nutrition-protein">0g</p>
+              <p className="text-xs text-gray-400">/ 150g goal</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-1">Carbs</p>
+              <p className="text-2xl font-bold text-nutrition-carbs">0g</p>
+              <p className="text-xs text-gray-400">/ 250g goal</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 mb-1">Fat</p>
+              <p className="text-2xl font-bold text-nutrition-fat">0g</p>
+              <p className="text-xs text-gray-400">/ 65g goal</p>
+            </div>
+          </div>
+        </Card>
+
+        {/* Quick Actions */}
+        <div className="flex gap-3">
+          <Button className="flex-1">
             Add Food Entry
-          </h2>
-          <p className="text-gray-600 mb-6">
-            Log what you eat and let AI analyze the nutrition content automatically.
-          </p>
-          <Link
-            href={'/add-food' as any}
-            className="btn-primary px-6 py-3"
-          >
-            Add Food Now
-          </Link>
+          </Button>
+          <Button variant="outline">
+            View History
+          </Button>
         </div>
 
-        <div className="card">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-            Today&apos;s Summary
-          </h2>
-          <p className="text-gray-600 mb-6">
-            View your daily nutrition totals and food log.
-          </p>
-          <Link
-            href={'/today' as any}
-            className="btn-secondary px-6 py-3"
-          >
-            View Today
-          </Link>
-        </div>
-      </div>
-
-      {/* Features Overview */}
-      <div className="bg-primary-50 rounded-xl p-8">
-        <h2 className="text-2xl font-bold text-center text-gray-900 mb-8">
-          Features
-        </h2>
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="text-center">
-            <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <span className="text-primary-600 text-xl">🍎</span>
-            </div>
-            <h3 className="font-semibold text-gray-900 mb-2">Smart Food Logging</h3>
-            <p className="text-gray-600 text-sm">
-              Describe your food in natural language and get nutrition analysis
-            </p>
+        {/* Food Log */}
+        <Card>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Food Entries
+          </h3>
+          <div className="text-center py-12 text-gray-500">
+            <p className="mb-2">No food entries yet today</p>
+            <p className="text-sm">Add your first meal to get started</p>
           </div>
-
-          <div className="text-center">
-            <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <span className="text-primary-600 text-xl">📊</span>
-            </div>
-            <h3 className="font-semibold text-gray-900 mb-2">Nutrition Tracking</h3>
-            <p className="text-gray-600 text-sm">
-              Track calories, protein, carbs, and fat with visual progress bars
-            </p>
-          </div>
-
-          <div className="text-center">
-            <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <span className="text-primary-600 text-xl">🤖</span>
-            </div>
-            <h3 className="font-semibold text-gray-900 mb-2">AI-Powered</h3>
-            <p className="text-gray-600 text-sm">
-              Powered by OpenAI for accurate food recognition and nutrition data
-            </p>
-          </div>
-        </div>
+        </Card>
       </div>
-
-      {/* GraphQL Test */}
-      <div className="bg-white rounded-xl border p-6">
-        <GraphQLTest />
-      </div>
-
-      {/* Development Status */}
-      <div className="text-center py-8 border-t">
-        <p className="text-sm text-gray-500">
-          ✅ GraphQL client connected! Backend integration working.
-        </p>
-      </div>
-    </div>
-  )
+    </AppLayout>
+  );
 }
