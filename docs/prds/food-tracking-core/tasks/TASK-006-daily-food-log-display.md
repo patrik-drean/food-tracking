@@ -459,6 +459,8 @@ export function EditFoodModal({
 ```
 
 #### Progress Bar Component
+
+{% raw %}
 ```typescript
 // frontend/src/components/ui/ProgressBar.tsx
 import { cn } from '@/lib/utils';
@@ -511,6 +513,7 @@ export function ProgressBar({
   );
 }
 ```
+{% endraw %}
 
 #### Empty State Component
 ```typescript
