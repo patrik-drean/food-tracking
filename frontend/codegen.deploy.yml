@@ -1,6 +1,6 @@
-schema: 
-  - 'http://localhost:4000/graphql'
-  - 'src/generated/introspection.json'
+# Deployment-specific codegen configuration
+# This configuration only uses the introspection file and doesn't try to connect to the server
+schema: 'src/generated/introspection.json'
 documents: 'src/graphql/**/*.graphql'
 generates:
   src/generated/graphql.ts:
@@ -14,9 +14,3 @@ generates:
       scalars:
         DateTime: string
         ID: string
-  src/generated/introspection.json:
-    plugins:
-      - introspection
-hooks:
-  afterAllFileWrite:
-    - prettier --write

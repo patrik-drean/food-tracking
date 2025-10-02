@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run codegen && next build",
+    "build": "npm run codegen:deploy && next build",
+    "build:no-codegen": "next build",
+    "build:local": "npm run codegen && next build",
     "start": "next start",
     "export": "next export",
     "deploy": "npm run build && npm run export",
@@ -15,7 +17,9 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "codegen": "graphql-codegen --config codegen.yml",
-    "codegen:watch": "graphql-codegen --config codegen.yml --watch"
+    "codegen:deploy": "bash scripts/codegen-deploy.sh",
+    "codegen:watch": "graphql-codegen --config codegen.yml --watch",
+    "setup:deploy": "bash scripts/setup-deployment.sh"
   },
   "dependencies": {
     "@urql/next": "^1.1.0",

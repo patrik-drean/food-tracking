@@ -108,6 +108,8 @@ npm run dev              # Start Next.js dev server
 npm run build            # Build for production
 npm run type-check       # TypeScript type checking
 npm run lint             # ESLint
+npm run codegen          # Generate GraphQL types (requires running backend)
+npm run codegen:deploy   # Generate types for deployment (uses existing introspection)
 ```
 
 ### Backend Commands
@@ -145,6 +147,23 @@ model Food {
 ```
 
 ## 🔌 GraphQL API
+
+### Code Generation
+
+The frontend uses GraphQL Code Generator to create TypeScript types from the GraphQL schema:
+
+```bash
+# Local development (requires running backend)
+npm run codegen
+
+# Deployment (uses existing introspection file)
+npm run codegen:deploy
+```
+
+This generates:
+- TypeScript types for all GraphQL operations
+- Urql hooks for queries and mutations
+- Type-safe GraphQL operations
 
 ### Example Queries
 
