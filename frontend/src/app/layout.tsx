@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import { GraphQLProvider } from '../lib/graphql-client'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,23 +21,25 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} bg-gray-50 text-gray-900 antialiased`}>
-        <div className="min-h-screen">
-          <header className="bg-white shadow-sm border-b">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex justify-between items-center h-16">
-                <h1 className="text-xl font-semibold text-gray-900">
-                  Food Tracker
-                </h1>
-                <div className="text-sm text-gray-500">
-                  Personal Nutrition Tracking
+        <GraphQLProvider>
+          <div className="min-h-screen">
+            <header className="bg-white shadow-sm border-b">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between items-center h-16">
+                  <h1 className="text-xl font-semibold text-gray-900">
+                    Food Tracker
+                  </h1>
+                  <div className="text-sm text-gray-500">
+                    Personal Nutrition Tracking
+                  </div>
                 </div>
               </div>
-            </div>
-          </header>
-          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {children}
-          </main>
-        </div>
+            </header>
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              {children}
+            </main>
+          </div>
+        </GraphQLProvider>
       </body>
     </html>
   )

@@ -1,0 +1,13 @@
+#import "../fragments/food.graphql"
+
+mutation AddFood($input: AddFoodInput!) {
+  addFood(input: $input) {
+    ...FoodFragment
+  }
+}
+
+mutation UpdateFoodNutrition($input: UpdateFoodNutritionInput!) {
+  updateFoodNutrition(input: $input) {
+    ...FoodFragment
+  }
+}

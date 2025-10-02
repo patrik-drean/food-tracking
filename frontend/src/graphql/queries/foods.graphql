@@ -1,0 +1,19 @@
+#import "../fragments/food.graphql"
+
+query TodaysFoods {
+  todaysFoods {
+    ...FoodFragment
+  }
+}
+
+query RecentFoods($limit: Int) {
+  recentFoods(limit: $limit) {
+    ...FoodFragment
+  }
+}
+
+query FoodsByDate($date: String!) {
+  foodsByDate(date: $date) {
+    ...FoodFragment
+  }
+}

@@ -23,7 +23,9 @@
       "@/*": ["./src/*"],
       "@/components/*": ["./src/components/*"],
       "@/lib/*": ["./src/lib/*"],
-      "@/types/*": ["./src/types/*"]
+      "@/types/*": ["./src/types/*"],
+      "@/generated/*": ["./src/generated/*"],
+      "@/graphql/*": ["./src/graphql/*"]
     },
     "forceConsistentCasingInFileNames": true,
     "exactOptionalPropertyTypes": true,

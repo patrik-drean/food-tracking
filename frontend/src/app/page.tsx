@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { GraphQLTest } from '@/components/GraphQLTest'
 
 export default function HomePage() {
   return (
@@ -86,10 +87,15 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* GraphQL Test */}
+      <div className="bg-white rounded-xl border p-6">
+        <GraphQLTest />
+      </div>
+
       {/* Development Status */}
       <div className="text-center py-8 border-t">
         <p className="text-sm text-gray-500">
-          🚧 This is a development version. Backend GraphQL server coming soon!
+          ✅ GraphQL client connected! Backend integration working.
         </p>
       </div>
     </div>

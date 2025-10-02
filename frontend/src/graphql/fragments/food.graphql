@@ -1,0 +1,10 @@
+fragment FoodFragment on Food {
+  id
+  description
+  calories
+  fat
+  carbs
+  protein
+  isManual
+  createdAt
+}
