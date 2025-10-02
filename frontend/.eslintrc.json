@@ -1,0 +1,17 @@
+{
+  "extends": [
+    "next/core-web-vitals"
+  ],
+  "rules": {
+    "no-unused-vars": "error",
+    "prefer-const": "error",
+    "no-var": "error",
+    "no-console": "warn",
+    "react/no-unescaped-entities": "off"
+  },
+  "env": {
+    "browser": true,
+    "es2020": true,
+    "node": true
+  }
+}

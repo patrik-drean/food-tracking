@@ -1,0 +1,53 @@
+{
+  "name": "food-tracking-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Personal food tracking application with AI-powered nutrition analysis",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "test": "npm run test:frontend && npm run test:backend",
+    "test:frontend": "cd frontend && npm test",
+    "test:backend": "cd backend && npm test",
+    "lint": "npm run lint:frontend && npm run lint:backend",
+    "lint:frontend": "cd frontend && npm run lint",
+    "lint:backend": "cd backend && npm run lint",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md}\"",
+    "clean": "rm -rf frontend/node_modules backend/node_modules node_modules frontend/.next backend/dist",
+    "install:clean": "npm run clean && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "prettier": "^3.0.3",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/patrikdrean/food-tracking.git"
+  },
+  "keywords": [
+    "food-tracking",
+    "nutrition",
+    "typescript",
+    "nextjs",
+    "graphql",
+    "prisma",
+    "monorepo"
+  ],
+  "author": "Patrik Drean",
+  "license": "MIT"
+}

@@ -1,0 +1,45 @@
+import { builder } from './builder'
+
+// Food type definition
+export const Food = builder.prismaObject('Food', {
+  description: 'A food entry with nutrition information',
+  fields: (t) => ({
+    id: t.exposeID('id', { description: 'Unique identifier for the food entry' }),
+    description: t.exposeString('description', { description: 'Description of the food item' }),
+    calories: t.exposeFloat('calories', { nullable: true, description: 'Calories per serving' }),
+    fat: t.exposeFloat('fat', { nullable: true, description: 'Fat content in grams' }),
+    carbs: t.exposeFloat('carbs', { nullable: true, description: 'Carbohydrate content in grams' }),
+    protein: t.exposeFloat('protein', { nullable: true, description: 'Protein content in grams' }),
+    isManual: t.exposeBoolean('isManual', { description: 'Whether nutrition was manually entered' }),
+    aiModel: t.exposeString('aiModel', { nullable: true, description: 'AI model used for nutrition analysis' }),
+    createdAt: t.expose('createdAt', { type: Date, description: 'When the food was logged' }),
+    updatedAt: t.expose('updatedAt', { type: Date, description: 'When the food was last updated' }),
+  }),
+})
+
+
+// Input type for adding food entries
+export const AddFoodInput = builder.inputType('AddFoodInput', {
+  description: 'Input for adding a new food entry',
+  fields: (t) => ({
+    description: t.string({ required: true, description: 'Description of the food item' }),
+    calories: t.float({ required: false, description: 'Calories per serving' }),
+    fat: t.float({ required: false, description: 'Fat content in grams' }),
+    carbs: t.float({ required: false, description: 'Carbohydrate content in grams' }),
+    protein: t.float({ required: false, description: 'Protein content in grams' }),
+    isManual: t.boolean({ required: false, defaultValue: false, description: 'Whether nutrition was manually entered' }),
+  }),
+})
+
+// Input type for updating food entries
+export const UpdateFoodInput = builder.inputType('UpdateFoodInput', {
+  description: 'Input for updating an existing food entry',
+  fields: (t) => ({
+    description: t.string({ required: false, description: 'Description of the food item' }),
+    calories: t.float({ required: false, description: 'Calories per serving' }),
+    fat: t.float({ required: false, description: 'Fat content in grams' }),
+    carbs: t.float({ required: false, description: 'Carbohydrate content in grams' }),
+    protein: t.float({ required: false, description: 'Protein content in grams' }),
+    isManual: t.boolean({ required: false, description: 'Whether nutrition was manually entered' }),
+  }),
+})

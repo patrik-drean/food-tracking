@@ -1,0 +1,108 @@
+import { builder } from './builder'
+import { prisma } from '@/lib/prisma'
+import { startOfDay, endOfDay } from 'date-fns'
+
+// Query to get all food entries for a specific date
+builder.queryField('foodsByDate', (t) =>
+  t.prismaField({
+    type: ['Food'],
+    description: 'Get all food entries for a specific date',
+    args: {
+      date: t.arg.string({ required: true, description: 'Date in YYYY-MM-DD format' }),
+    },
+    resolve: async (query, _parent, args) => {
+      const date = new Date(args.date)
+      const start = startOfDay(date)
+      const end = endOfDay(date)
+
+      return prisma.food.findMany({
+        ...query,
+        where: {
+          createdAt: {
+            gte: start,
+            lte: end,
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      })
+    },
+  })
+)
+
+// Query to get a single food entry by ID
+builder.queryField('food', (t) =>
+  t.prismaField({
+    type: 'Food',
+    nullable: true,
+    description: 'Get a food entry by ID',
+    args: {
+      id: t.arg.string({ required: true, description: 'Food entry ID' }),
+    },
+    resolve: async (query, _parent, args) => {
+      return prisma.food.findUnique({
+        ...query,
+        where: {
+          id: args.id,
+        },
+      })
+    },
+  })
+)
+
+// Query to get recent unique food descriptions for suggestions
+builder.queryField('recentFoods', (t) =>
+  t.prismaField({
+    type: ['Food'],
+    description: 'Get recent unique food entries for suggestions',
+    args: {
+      limit: t.arg.int({ required: false, defaultValue: 10, description: 'Number of suggestions to return' }),
+    },
+    resolve: async (query, _parent, args) => {
+      return prisma.food.findMany({
+        ...query,
+        distinct: ['description'],
+        take: args.limit ?? 10,
+        orderBy: {
+          createdAt: 'desc',
+        },
+        where: {
+          // Only include foods with complete nutrition data for suggestions
+          calories: { not: null },
+          protein: { not: null },
+          carbs: { not: null },
+          fat: { not: null },
+        },
+      })
+    },
+  })
+)
+
+// Query to search foods by description
+builder.queryField('searchFoods', (t) =>
+  t.prismaField({
+    type: ['Food'],
+    description: 'Search food entries by description',
+    args: {
+      query: t.arg.string({ required: true, description: 'Search query' }),
+      limit: t.arg.int({ required: false, defaultValue: 10, description: 'Number of results to return' }),
+    },
+    resolve: async (query, _parent, args) => {
+      return prisma.food.findMany({
+        ...query,
+        where: {
+          description: {
+            contains: args.query,
+            mode: 'insensitive',
+          },
+        },
+        distinct: ['description'],
+        take: args.limit ?? 10,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      })
+    },
+  })
+)

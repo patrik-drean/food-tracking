@@ -376,3 +376,18 @@ auto-generated/
 # Temporary files
 *.tmp
 *.temp
+
+# Monorepo specific
+frontend/node_modules/
+backend/node_modules/
+frontend/.next/
+frontend/out/
+backend/dist/
+
+# Prisma specific
+backend/prisma/migrations/
+
+# Environment files (but keep examples)
+!.env.example
+!frontend/.env.example
+!backend/.env.example

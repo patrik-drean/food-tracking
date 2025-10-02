@@ -1,6 +1,6 @@
-# Task Verification Guidelines
+# Task Verification Guidelines - Food Tracking Application
 
-This document provides Claude Code with specific guidance on how to verify completed tasks for your application, including quality standards, testing requirements, and deployment readiness checks.
+This document provides Claude Code with specific guidance on how to verify completed tasks for the food tracking application, including quality standards, testing requirements, and deployment readiness checks.
 
 ## Verification Overview
 
@@ -18,7 +18,7 @@ Task verification ensures that all completed work meets your application's quali
 All tasks must pass these quality gates before being marked complete:
 - [ ] **Functional Requirements**: All acceptance criteria met
 - [ ] **Code Quality**: Meets coding standards and passes linting
-- [ ] **Test Coverage**: [Target: e.g., 80%+ coverage for new code]
+- [ ] **Test Coverage**: 80%+ coverage for new code, 90%+ for nutrition calculations
 - [ ] **Integration Tests**: All integration points working
 - [ ] **Performance**: Meets response time requirements
 - [ ] **Security**: Security checklist items verified
@@ -51,34 +51,58 @@ All tasks must pass these quality gates before being marked complete:
 
 ### Automated Quality Checks
 ```bash
-# Code quality commands to run during verification
-[linting command]          # Check code style and potential issues
-[type checking command]    # Verify type safety (if applicable)
-[security scan command]    # Check for security vulnerabilities
-[dependency audit]         # Check for vulnerable dependencies
+# Root quality checks (run all at once)
+npm run lint              # Check code style across frontend and backend
+npm run format:check      # Verify code formatting with Prettier
+npm run type-check        # TypeScript compilation check for both packages
+npm audit                 # Check for vulnerable dependencies
+
+# Frontend specific
+cd frontend
+npm run lint              # ESLint with Next.js and TypeScript rules
+npm run type-check        # Next.js TypeScript compilation
+npm run build             # Verify production build succeeds
+
+# Backend specific
+cd backend
+npm run lint              # ESLint with TypeScript and Node.js rules
+npm run type-check        # TypeScript compilation without Prisma type issues
+npm run build             # Verify TypeScript compilation to dist/
+npx prisma validate       # Validate Prisma schema
+npx prisma format         # Check Prisma schema formatting
 ```
 
 ## Testing Verification
 
 ### Test Coverage Requirements
-- **Unit Tests**: [e.g., 80%+ coverage for new business logic]
-- **Integration Tests**: [e.g., All API endpoints tested]
-- **End-to-End Tests**: [e.g., Critical user flows tested]
-- **Performance Tests**: [e.g., Load testing for new features]
+- **Unit Tests**: 80%+ coverage for React components, 90%+ for nutrition calculation functions
+- **Integration Tests**: All GraphQL resolvers tested with mocked Prisma
+- **End-to-End Tests**: Core food logging and nutrition analysis workflows
+- **Performance Tests**: GraphQL query performance < 500ms, AI analysis < 3 seconds
 
 ### Test Execution Checklist
 ```bash
+# Root level testing (all packages)
+npm test                  # Run all tests across monorepo
+npm run test:coverage     # Generate coverage reports
+
 # Frontend testing commands
-cd [frontend-directory]
-[unit test command]        # Run frontend unit tests
-[integration test command] # Run frontend integration tests
-[e2e test command]        # Run end-to-end tests
+cd frontend
+npm test                  # Jest + React Testing Library
+npm run test:watch        # Watch mode for development
+npm run test:coverage     # Coverage report for components
 
 # Backend testing commands
-cd [backend-directory]
-[unit test command]        # Run backend unit tests
-[integration test command] # Run API integration tests
-[database test command]    # Run database-related tests
+cd backend
+npm test                  # Jest for GraphQL resolvers and services
+npm run test:watch        # Watch mode for development
+npm run test:coverage     # Coverage for business logic
+
+# Database testing
+cd backend
+npx prisma migrate reset --force  # Reset test database
+npx prisma db seed               # Seed with test data
+# Run integration tests with real database
 ```
 
 #### Test Quality Standards
@@ -129,48 +153,63 @@ cd [backend-directory]
 
 ## Performance Verification
 
-### Performance Standards
-- **API Response Times**: [e.g., < 200ms for GET requests, < 500ms for POST]
-- **Page Load Times**: [e.g., < 3 seconds initial load, < 1 second navigation]
-- **Database Queries**: [e.g., < 100ms for simple queries]
-- **Memory Usage**: [e.g., No memory leaks, reasonable memory consumption]
+### Food Tracking Performance Standards
+- **GraphQL Query Times**: < 100ms for daily food queries, < 500ms for food search
+- **AI Nutrition Analysis**: < 3 seconds for OpenAI API calls (when implemented)
+- **Page Load Times**: < 2 seconds initial load, < 500ms SPA navigation
+- **Database Queries**: < 50ms for date-based food queries, < 100ms for food search
+- **Memory Usage**: No memory leaks in food entry components, < 100MB heap usage
 
 ### Performance Testing
 ```bash
-# Performance testing commands
-[load test command]        # Run load tests against APIs
-[performance test command] # Run frontend performance tests
-[database benchmark]       # Test database query performance
+# GraphQL performance testing
+cd backend
+npm run perf:graphql      # Load test GraphQL endpoints
+# Test queries: foodsByDate, searchFoods, addFood, updateFood
+
+# Frontend performance testing
+cd frontend
+npm run build             # Verify production build size
+npm run analyze           # Bundle size analysis
+npx lighthouse http://localhost:3000 --output=json
+
+# Database performance testing
+cd backend
+# Test with realistic data (1000+ food entries)
+psql $DATABASE_URL -c "EXPLAIN ANALYZE SELECT * FROM foods WHERE created_at >= '2024-01-01';"
+psql $DATABASE_URL -c "EXPLAIN ANALYZE SELECT DISTINCT description FROM foods WHERE description ILIKE '%pizza%';"
 ```
 
-#### Performance Checklist
-- [ ] **Response times**: All endpoints meet response time requirements
-- [ ] **Database performance**: Queries optimized and performant
-- [ ] **Memory usage**: No memory leaks, acceptable memory consumption
-- [ ] **Concurrent users**: System handles expected concurrent load
-- [ ] **Resource usage**: CPU and memory usage within acceptable limits
+#### Food Tracking Performance Checklist
+- [ ] **GraphQL response times**: Daily food queries < 100ms, search queries < 500ms
+- [ ] **Database performance**: Date-based indexes used, food search optimized
+- [ ] **Memory usage**: No React memory leaks in food entry forms
+- [ ] **AI API performance**: OpenAI nutrition analysis < 3 seconds (when implemented)
+- [ ] **Mobile performance**: Smooth scrolling on food lists, responsive touch interactions
+- [ ] **Bundle size**: Frontend build < 1MB gzipped, code splitting for routes
 
 ## Security Verification
 
-### Security Checklist
+### Food Tracking Security Checklist
 #### Authentication & Authorization
-- [ ] **Authentication required**: Protected endpoints require authentication
-- [ ] **Authorization checks**: Users can only access permitted resources
-- [ ] **Token validation**: JWT tokens (if used) properly validated
-- [ ] **Session management**: Sessions handled securely
+- [ ] **No authentication required**: Single-user app, no auth system needed
+- [ ] **Input validation**: Food descriptions validated for length and content
+- [ ] **API access**: GraphQL endpoint accessible only from authorized frontend domain
+- [ ] **Environment security**: Database URL and API keys properly secured
 
-#### Data Security
-- [ ] **Input sanitization**: All user inputs properly sanitized
-- [ ] **SQL injection**: Database queries use parameterized statements
-- [ ] **XSS prevention**: Output properly encoded/escaped
-- [ ] **CSRF protection**: CSRF tokens implemented where needed
-- [ ] **Sensitive data**: PII and sensitive data properly protected
+#### Food Data Security
+- [ ] **Food description sanitization**: User food descriptions sanitized to prevent XSS
+- [ ] **SQL injection prevention**: Prisma ORM with parameterized queries
+- [ ] **XSS prevention**: Food descriptions properly escaped in React components
+- [ ] **No CSRF needed**: GraphQL API with proper CORS configuration
+- [ ] **No sensitive data**: Only food descriptions and nutrition data stored
 
 #### Infrastructure Security
-- [ ] **HTTPS enforcement**: All production traffic uses HTTPS
-- [ ] **CORS configuration**: CORS policies properly configured
-- [ ] **Rate limiting**: API rate limiting implemented where appropriate
-- [ ] **Error disclosure**: Error messages don't leak sensitive information
+- [ ] **HTTPS enforcement**: Railway backend and GitHub Pages use HTTPS
+- [ ] **CORS configuration**: Backend allows only frontend domain access
+- [ ] **Rate limiting**: OpenAI API calls rate limited to manage costs
+- [ ] **Error disclosure**: GraphQL errors don't expose database details
+- [ ] **API key security**: OpenAI API key stored securely in Railway environment
 
 ## Accessibility Verification
 
@@ -192,10 +231,10 @@ Follow [WCAG 2.1 AA] guidelines or your organization's accessibility standards.
 ```
 
 #### Manual Accessibility Testing
-- [ ] **Keyboard only**: Navigate entire feature using only keyboard
-- [ ] **Screen reader**: Test with screen reader (NVDA, JAWS, VoiceOver)
-- [ ] **Color blindness**: Test with color blindness simulators
-- [ ] **High contrast**: Test with high contrast mode enabled
+- [ ] **Keyboard only**: Navigate food entry forms and nutrition displays using only keyboard
+- [ ] **Screen reader**: Test nutrition data announcements with VoiceOver/NVDA
+- [ ] **Color blindness**: Test nutrition color coding (calories=orange, protein=red, carbs=blue, fat=purple)
+- [ ] **High contrast**: Test with high contrast mode, ensure nutrition bars are visible
 
 ## Documentation Verification
 
@@ -216,23 +255,42 @@ Follow [WCAG 2.1 AA] guidelines or your organization's accessibility standards.
 
 ### Build Verification
 ```bash
-# Build verification commands
-[frontend build command]   # Verify frontend builds successfully
-[backend build command]    # Verify backend builds successfully
-[docker build command]     # Build container images if applicable
+# Monorepo build verification
+npm run build             # Build both frontend and backend
+npm run lint              # Verify no linting errors
+npm run type-check        # Verify TypeScript compilation
+
+# Frontend build verification
+cd frontend
+npm run build             # Next.js production build
+npm run export            # Static export for GitHub Pages
+ls out/                   # Verify static files generated
+
+# Backend build verification
+cd backend
+npm run build             # TypeScript compilation to dist/
+ls dist/                  # Verify JavaScript files generated
+npx prisma generate       # Verify Prisma client generation
+npx prisma validate       # Verify schema is valid
+
+# No Docker needed for this deployment strategy
 ```
 
 #### Build Checklist
-- [ ] **No build errors**: All builds complete without errors
-- [ ] **No build warnings**: Address or document any build warnings
-- [ ] **Asset optimization**: Images and assets properly optimized
-- [ ] **Bundle size**: Frontend bundle size within acceptable limits
+- [ ] **No build errors**: Both Next.js and TypeScript builds succeed
+- [ ] **TypeScript compilation**: No TypeScript errors in strict mode
+- [ ] **Prisma client generation**: Database client generates without errors
+- [ ] **Static export**: Next.js static export works for GitHub Pages
+- [ ] **Bundle size**: Frontend bundle < 1MB gzipped, code splitting enabled
+- [ ] **Asset optimization**: Images optimized, fonts loaded efficiently
 
 ### Environment Configuration
-- [ ] **Environment variables**: All required env vars documented
-- [ ] **Configuration validation**: App starts successfully with production config
-- [ ] **Database migrations**: Migrations run successfully in staging/production
-- [ ] **External dependencies**: All external services properly configured
+- [ ] **Backend environment**: DATABASE_URL, NODE_ENV, PORT, FRONTEND_URL configured
+- [ ] **Frontend environment**: NEXT_PUBLIC_GRAPHQL_ENDPOINT set for production
+- [ ] **Railway configuration**: Auto-deploy from main branch, PostgreSQL connected
+- [ ] **GitHub Pages**: Static export deployment, custom domain (if used)
+- [ ] **Database migrations**: Prisma migrations run successfully on Railway
+- [ ] **OpenAI API**: API key configured (when AI features implemented)
 
 ### Rollback Planning
 - [ ] **Rollback strategy**: Clear plan for rolling back changes if needed
@@ -268,10 +326,11 @@ Review each acceptance criterion from the original task:
 ### User Confirmation Process
 After technical verification is complete:
 
-1. **Present Summary**: Provide comprehensive verification summary
-2. **Request User Review**: Ask user to confirm requirements are met
-3. **Address Feedback**: Make any requested adjustments
-4. **Final Approval**: Get explicit user confirmation of satisfaction
+1. **Present Summary**: Provide comprehensive verification summary with specific food tracking metrics
+2. **Demo Key Features**: Show working food entry, nutrition display, and data persistence
+3. **Request User Review**: Ask user to test core workflows (add food, view daily totals, search)
+4. **Address Feedback**: Make any requested adjustments to UI, calculations, or data handling
+5. **Final Approval**: Get explicit user confirmation that food tracking functionality meets requirements
 
 ### Task Completion Documentation
 Once user confirms satisfaction:
@@ -283,63 +342,171 @@ Once user confirms satisfaction:
 
 ---
 
-## Verification Commands Quick Reference
+## Food Tracking Verification Commands Quick Reference
 
 ```bash
-# Quality checks
-[lint command]
-[type check command]
-[security scan command]
+# Quality checks (from root)
+npm run lint              # ESLint for frontend and backend
+npm run format:check      # Prettier formatting check
+npm run type-check        # TypeScript compilation check
+npm audit                 # Security vulnerability scan
 
-# Testing
-[unit test command]
-[integration test command]
-[e2e test command]
+# Testing (from root)
+npm test                  # All unit and integration tests
+npm run test:coverage     # Coverage reports
 
 # Performance
-[load test command]
-[performance benchmark command]
+cd backend && npm run perf:graphql  # GraphQL load testing
+cd frontend && npx lighthouse http://localhost:3000
+psql $DATABASE_URL -c "EXPLAIN ANALYZE SELECT * FROM foods;"
 
 # Build verification
-[build command]
-[production build verification]
+npm run build             # Build both frontend and backend
+cd frontend && npm run export  # Static export verification
+cd backend && npx prisma validate  # Schema validation
 
 # Deployment readiness
-[migration test command]
-[environment validation command]
+cd backend && npx prisma migrate deploy  # Run migrations
+cd backend && npm start   # Test production server
+cd frontend && npm run build && npm run export  # Static build
 ```
 
 ## Common Verification Patterns
 
-### API Endpoint Verification
+### GraphQL API Verification
 ```bash
-# Example API testing pattern
-curl -X GET [endpoint] -H "Authorization: Bearer [token]"
-# Verify response format, status codes, performance
+# Test GraphQL queries (no auth required)
+curl -X POST http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{"query": "query { foodsByDate(date: \"2024-01-01\") { id description calories } }"}
+
+# Test food entry mutation
+curl -X POST http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{"query": "mutation { addFood(input: { description: \"test food\", calories: 100 }) { id } }"}
+
+# Verify GraphQL introspection works
+curl -X POST http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{"query": "{ __schema { types { name } } }"}
 ```
 
 ### Database Verification
 ```sql
--- Example database verification queries
-SELECT COUNT(*) FROM [table] WHERE [condition];
--- Verify data integrity and constraints
+-- Food tracking database verification
+SELECT COUNT(*) FROM foods WHERE created_at >= CURRENT_DATE;
+SELECT description, calories, protein, carbs, fat FROM foods LIMIT 5;
+
+-- Verify indexes are working
+EXPLAIN ANALYZE SELECT * FROM foods WHERE created_at >= '2024-01-01';
+EXPLAIN ANALYZE SELECT * FROM foods WHERE description ILIKE '%pizza%';
+
+-- Check data integrity
+SELECT COUNT(*) FROM foods WHERE calories < 0;  -- Should be 0
+SELECT COUNT(*) FROM foods WHERE description = '';  -- Should be 0
+
+-- Verify cache table (if implemented)
+SELECT COUNT(*) FROM food_cache;
+SELECT description_hash, use_count FROM food_cache ORDER BY use_count DESC LIMIT 5;
 ```
 
 ### Frontend Verification
 ```bash
-# Example frontend verification
-[test runner] --coverage
-# Verify component rendering, user interactions, accessibility
+# React component testing
+cd frontend
+npm test -- --coverage
+npm run test -- --testNamePattern="FoodCard"
+
+# Visual and interaction testing
+npm run dev  # Start dev server
+# Manual testing checklist:
+# - Home page loads with welcome message
+# - Navigation works (add food, today's summary)
+# - TailwindCSS styles applied correctly
+# - Responsive design on mobile/tablet/desktop
+# - Food entry form validation
+# - Nutrition display components
+
+# Accessibility testing
+npx @axe-core/cli http://localhost:3000
+# Test keyboard navigation through food forms
+# Test screen reader announcements for nutrition data
 ```
 
 ---
 
-## Instructions for Using This Template
+## Food Tracking Specific Verification Patterns
 
-1. **Customize verification standards** to match your application's requirements
-2. **Update command examples** with your actual testing and build commands
-3. **Define specific performance thresholds** relevant to your application
-4. **Include domain-specific verification steps** for your industry/use case
-5. **Reference this document** in your task verification process
+### Nutrition Data Validation
+```typescript
+// Verify nutrition calculation accuracy
+const validateNutritionTotals = (foods: Food[]) => {
+  const totals = foods.reduce((sum, food) => ({
+    calories: sum.calories + (food.calories || 0),
+    protein: sum.protein + (food.protein || 0),
+    carbs: sum.carbs + (food.carbs || 0),
+    fat: sum.fat + (food.fat || 0)
+  }), { calories: 0, protein: 0, carbs: 0, fat: 0 })
 
-This document ensures consistent, thorough verification of all completed tasks before deployment, maintaining high quality standards across your application.
+  // Verify calculations are reasonable
+  expect(totals.calories).toBeGreaterThanOrEqual(0)
+  expect(totals.protein * 4 + totals.carbs * 4 + totals.fat * 9)
+    .toBeCloseTo(totals.calories, 50) // Within 50 calories tolerance
+}
+```
+
+### AI Integration Verification (Future)
+```typescript
+// When OpenAI integration is implemented
+const verifyAINutritionAnalysis = async (description: string) => {
+  const analysis = await analyzeNutrition(description)
+
+  // Verify required fields
+  expect(analysis.calories).toBeGreaterThan(0)
+  expect(analysis.protein).toBeGreaterThanOrEqual(0)
+  expect(analysis.carbs).toBeGreaterThanOrEqual(0)
+  expect(analysis.fat).toBeGreaterThanOrEqual(0)
+
+  // Verify reasonable ranges
+  expect(analysis.calories).toBeLessThan(10000) // Sanity check
+  expect(analysis.protein).toBeLessThan(1000)   // Sanity check
+}
+```
+
+### Mobile-First Verification
+```bash
+# Test mobile responsiveness
+cd frontend
+npm run dev
+
+# Test with Chrome DevTools device emulation:
+# - iPhone 12 Pro (390x844)
+# - iPad (768x1024)
+# - Galaxy S20 (360x800)
+
+# Verify:
+# - Food entry forms work on touch devices
+# - Nutrition displays are readable on small screens
+# - Navigation is thumb-friendly
+# - No horizontal scrolling on mobile
+```
+
+### Performance Monitoring
+```bash
+# Monitor GraphQL query performance
+cd backend
+# Enable query logging in development
+export NODE_ENV=development
+npm run dev
+
+# Monitor slow queries (> 100ms)
+tail -f logs/graphql-queries.log | grep "duration.*[1-9][0-9][0-9]"
+
+# Database query analysis
+psql $DATABASE_URL
+\timing on
+SELECT * FROM foods WHERE created_at >= CURRENT_DATE;
+SELECT DISTINCT description FROM foods WHERE description ILIKE '%chicken%';
+```
+
+This document ensures consistent, thorough verification of all food tracking features before deployment, maintaining high quality standards for nutrition data accuracy, mobile usability, and GraphQL API performance.

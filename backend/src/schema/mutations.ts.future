@@ -1,0 +1,127 @@
+import { builder } from './builder'
+import { prisma } from '@/lib/prisma'
+import { AddFoodInput, UpdateFoodInput } from './types'
+
+// Mutation to add a new food entry
+builder.mutationField('addFood', (t) =>
+  t.prismaField({
+    type: 'Food',
+    description: 'Add a new food entry',
+    args: {
+      input: t.arg({ type: AddFoodInput, required: true }),
+    },
+    resolve: async (query, _parent, args) => {
+      const { input } = args
+
+      // Basic validation
+      if (!input.description || input.description.trim().length === 0) {
+        throw new Error('Food description is required')
+      }
+
+      if (input.description.length > 500) {
+        throw new Error('Food description is too long (max 500 characters)')
+      }
+
+      // Validate nutrition values if provided
+      const nutritionFields = ['calories', 'fat', 'carbs', 'protein'] as const
+      for (const field of nutritionFields) {
+        const value = input[field]
+        if (value !== null && value !== undefined && (value < 0 || value > 10000)) {
+          throw new Error(`${field} must be between 0 and 10000`)
+        }
+      }
+
+      return prisma.food.create({
+        ...query,
+        data: {
+          description: input.description.trim(),
+          calories: input.calories,
+          fat: input.fat,
+          carbs: input.carbs,
+          protein: input.protein,
+          isManual: input.isManual || false,
+          aiModel: input.isManual ? null : 'manual', // Will be updated when AI integration is added
+        },
+      })
+    },
+  })
+)
+
+// Mutation to update an existing food entry
+builder.mutationField('updateFood', (t) =>
+  t.prismaField({
+    type: 'Food',
+    nullable: true,
+    description: 'Update an existing food entry',
+    args: {
+      id: t.arg.string({ required: true, description: 'Food entry ID' }),
+      input: t.arg({ type: UpdateFoodInput, required: true }),
+    },
+    resolve: async (query, _parent, args) => {
+      const { id, input } = args
+
+      // Check if food exists
+      const existingFood = await prisma.food.findUnique({
+        where: { id },
+      })
+
+      if (!existingFood) {
+        throw new Error('Food entry not found')
+      }
+
+      // Basic validation
+      if (input.description !== undefined) {
+        if (!input.description || input.description.trim().length === 0) {
+          throw new Error('Food description cannot be empty')
+        }
+        if (input.description.length > 500) {
+          throw new Error('Food description is too long (max 500 characters)')
+        }
+      }
+
+      // Validate nutrition values if provided
+      const nutritionFields = ['calories', 'fat', 'carbs', 'protein'] as const
+      for (const field of nutritionFields) {
+        const value = input[field]
+        if (value !== null && value !== undefined && (value < 0 || value > 10000)) {
+          throw new Error(`${field} must be between 0 and 10000`)
+        }
+      }
+
+      const updateData: any = {}
+      if (input.description !== undefined) updateData.description = input.description.trim()
+      if (input.calories !== undefined) updateData.calories = input.calories
+      if (input.fat !== undefined) updateData.fat = input.fat
+      if (input.carbs !== undefined) updateData.carbs = input.carbs
+      if (input.protein !== undefined) updateData.protein = input.protein
+      if (input.isManual !== undefined) updateData.isManual = input.isManual
+
+      return prisma.food.update({
+        ...query,
+        where: { id },
+        data: updateData,
+      })
+    },
+  })
+)
+
+// Mutation to delete a food entry
+builder.mutationField('deleteFood', (t) =>
+  t.boolean({
+    description: 'Delete a food entry',
+    args: {
+      id: t.arg.string({ required: true, description: 'Food entry ID' }),
+    },
+    resolve: async (_parent, args) => {
+      try {
+        await prisma.food.delete({
+          where: { id: args.id },
+        })
+        return true
+      } catch (error) {
+        // If the food doesn't exist, Prisma will throw an error
+        return false
+      }
+    },
+  })
+)

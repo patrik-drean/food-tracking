@@ -1,0 +1,53 @@
+// Prisma schema for food tracking application
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Food {
+  id          String   @id @default(cuid())
+  description String   @db.VarChar(500)
+
+  // Nutrition data (nullable for gradual entry)
+  calories    Float?   @db.DoublePrecision
+  fat         Float?   @db.DoublePrecision
+  carbs       Float?   @db.DoublePrecision
+  protein     Float?   @db.DoublePrecision
+
+  // Metadata
+  isManual    Boolean  @default(false)  // True if manually entered, false if AI-generated
+  aiModel     String?  @db.VarChar(50)  // Which AI model was used (e.g., "gpt-4o-mini")
+
+  // Timestamps
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(6)
+
+  // Indexes for performance
+  @@index([createdAt])
+  @@index([description])
+  @@map("foods")
+}
+
+model FoodCache {
+  id              String   @id @default(cuid())
+
+  // Cache key and metadata
+  descriptionHash String   @unique @db.VarChar(64)  // SHA-256 hash
+  originalDesc    String   @db.VarChar(500)         // For debugging/reference
+
+  // Cached nutrition data from AI
+  nutritionData   Json     // Store the full AI response
+
+  // Cache management
+  aiModel         String   @db.VarChar(50)
+  createdAt       DateTime @default(now()) @db.Timestamptz(6)
+  lastUsed        DateTime @default(now()) @db.Timestamptz(6)
+  useCount        Int      @default(1)
+
+  @@index([lastUsed])  // For cache cleanup
+  @@map("food_cache")
+}
