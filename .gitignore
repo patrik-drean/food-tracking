@@ -365,6 +365,9 @@ local/
 generated/
 auto-generated/
 
+# But keep frontend GraphQL generated files (needed for GitHub Pages deployment)
+!frontend/src/generated/
+
 # Cache directories
 .cache/
 .parcel-cache/
