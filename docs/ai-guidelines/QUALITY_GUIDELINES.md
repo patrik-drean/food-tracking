@@ -450,6 +450,8 @@ Target compliance level: WCAG 2.1 AA
 - **Alternative Text**: Meaningful descriptions for nutrition charts and food images
 
 ### Accessibility Implementation
+
+{% raw %}
 ```tsx
 // Accessible nutrition progress bar
 interface NutritionProgressProps {
@@ -545,6 +547,7 @@ const FoodSearch: React.FC = () => {
   );
 };
 ```
+{% endraw %}
 
 ## Food Tracking Specific Quality Gates
 
