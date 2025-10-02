@@ -2,134 +2,105 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
+## AI Documentation System
 
-Personal Food Tracking App - A full-stack TypeScript application for learning modern development patterns:
-- **Frontend**: Next.js + React + Urql + TailwindCSS (in `frontend/`)
-- **Backend**: Yoga GraphQL Server + Pothos + Prisma ORM (in `backend/`)
-- **Learning Focus**: Modern TypeScript/GraphQL stack for career preparation
+This repository uses an AI-first documentation approach to help Claude Code understand your application context and follow your development patterns. Key documentation is located in `docs/ai-guidelines/`:
 
-## Common Development Commands
+- **`docs/ai-guidelines/PRODUCT_OVERVIEW.md`** - Business context, user personas, and product domain knowledge
+- **`docs/ai-guidelines/FRONTEND_GUIDELINES.md`** - Frontend architecture patterns, component standards, and development practices
+- **`docs/ai-guidelines/BACKEND_GUIDELINES.md`** - Backend architecture, API design, database patterns, and service layer guidelines
+- **`docs/ai-guidelines/DATABASE_GUIDELINES.md`** - Database design patterns, migration strategies, and query optimization
+- **`docs/ai-guidelines/QUALITY_GUIDELINES.md`** - Code quality standards, testing requirements, and documentation standards
+- **`docs/ai-guidelines/DEPLOYMENT_GUIDELINES.md`** - Deployment practices, environment configuration, and infrastructure requirements
+- **`docs/ai-guidelines/TASK_VERIFICATION_GUIDELINES.md`** - Quality standards, testing requirements, and deployment verification process
 
-### Frontend (Next.js + React)
+**Before working on any task, Claude Code should reference these documents to understand your specific application context and follow established patterns.**
+
+## Project Overview Template
+
+*Note: Replace this section with your actual application details. This is a template for any software project.*
+
+[Your Application Name] - [Brief description of your application]:
+- **Frontend**: [Your frontend technology stack]
+- **Backend**: [Your backend technology stack]
+- **Focus**: [Your development goals and priorities]
+
+## Common Development Commands Template
+
+*Replace these with your actual project commands:*
+
+### Frontend Commands
 ```bash
-cd frontend
-npm install              # Install dependencies
-npm run dev             # Start development server (port 3000)
-npm run build           # Build for production
-npm test                # Run tests
-npm run lint            # Lint code
+# Example commands - replace with your actual commands
+cd [frontend-directory]
+[install command]        # Install dependencies
+[dev command]           # Start development server
+[build command]         # Build for production
+[test command]          # Run tests
+[lint command]          # Lint code
 ```
 
-### Backend (GraphQL + TypeScript)
+### Backend Commands
 ```bash
-cd backend
-npm install             # Install dependencies
-npm run dev             # Start GraphQL server with hot reload
-npm run build           # Build TypeScript
-npm test                # Run tests
-npm run generate        # Generate Prisma client
+# Example commands - replace with your actual commands
+cd [backend-directory]
+[install command]        # Install dependencies
+[dev command]           # Start development server
+[build command]         # Build for production
+[test command]          # Run tests
+[migration command]     # Run database migrations
 ```
 
-### Database Operations (Prisma)
-```bash
-cd backend
-npx prisma migrate dev  # Run/create migrations
-npx prisma studio       # Open database browser
-npx prisma generate     # Generate client after schema changes
-```
+## Template Usage Instructions
 
-## Architecture Overview
+This repository serves as a template for AI-enhanced software development. To use this template for your project:
 
-### Backend Architecture (GraphQL + Prisma)
+### 1. Customize the AI Documentation
+Fill out the template files in `docs/ai-guidelines/` with your specific application details:
 
-The backend uses modern GraphQL-first architecture:
+- **`docs/ai-guidelines/PRODUCT_OVERVIEW.md`**: Replace with your business domain, user personas, and product context
+- **`docs/ai-guidelines/FRONTEND_GUIDELINES.md`**: Update with your frontend technology stack, component patterns, and coding standards
+- **`docs/ai-guidelines/BACKEND_GUIDELINES.md`**: Update with your backend architecture, API design patterns, and data layer details
+- **`docs/ai-guidelines/DATABASE_GUIDELINES.md`**: Update with your database technology, schema design patterns, and migration strategies
+- **`docs/ai-guidelines/QUALITY_GUIDELINES.md`**: Customize code quality standards, testing requirements, and performance benchmarks
+- **`docs/ai-guidelines/DEPLOYMENT_GUIDELINES.md`**: Update with your deployment platform, CI/CD pipeline, and infrastructure configuration
+- **`docs/ai-guidelines/TASK_VERIFICATION_GUIDELINES.md`**: Customize quality standards and testing requirements for your project
 
-**GraphQL Layer** (Yoga + Pothos):
-- Code-first GraphQL schema generation with Pothos
-- Type-safe resolvers and schema building
-- Built-in Yoga server features (CORS, validation, etc.)
+### 2. Update This CLAUDE.md File
+Replace the template sections above with your actual:
+- Project overview and technology stack
+- Development commands for your specific setup
+- Architecture patterns and key configuration files
 
-**Data Layer** (Prisma ORM):
-- Type-safe database client generated from schema
-- Automatic migrations and database management
-- Full TypeScript integration from DB to API
+### 3. Customize Claude Commands
+Update the command files in `.claude/` directory if needed:
+- `create-prd.md` - For creating Product Requirements Documents
+- `generate-task.md` - For breaking down features into tasks
+- `complete-task.md` - For implementing tasks
+- `verify-and-push-task.md` - For verifying and deploying completed work
 
-**Service Layer**:
-- External API integrations (OpenAI for food analysis)
-- Business logic and data transformation
-- Caching strategies for API optimization
+### 4. Copy Template to Your Project
+1. Copy this entire directory structure to your project
+2. Replace all template content with your project-specific information
+3. Commit the customized documentation to your repository
+4. Claude Code will now understand your project context and follow your patterns
 
-### Frontend Architecture (Next.js + React)
+## Benefits of This AI Documentation System
 
-**Component Structure**:
-- `src/components/` - React components with TailwindCSS styling
-- `src/pages/` - Next.js pages and API routes
-- `src/lib/` - Utilities and configuration
-- `src/graphql/` - GraphQL queries and mutations
+- **Context-Aware Development**: Claude Code understands your business domain and technical patterns
+- **Consistent Code Quality**: Enforces your coding standards and architectural patterns
+- **Faster Onboarding**: New developers (human or AI) can quickly understand your project structure
+- **Standardized Workflow**: Consistent task breakdown, implementation, and verification process
+- **Scalable Documentation**: Documentation that evolves with your project
 
-**Key Patterns**:
-- Urql GraphQL client for type-safe API communication
-- TailwindCSS for responsive, mobile-first design
-- React hooks for state management
-- Next.js App Router for modern routing patterns
+## Getting Started
 
-### GraphQL Integration
+1. **Fork or copy this template** to your project repository
+2. **Fill out the documentation templates** in `docs/ai/` with your project details
+3. **Update this CLAUDE.md file** with your actual project information
+4. **Test with Claude Code** by asking it to implement a small feature
+5. **Iterate and improve** the documentation based on your experience
 
-Full-stack type safety with GraphQL:
-- Shared TypeScript types between frontend and backend
-- Urql client with automatic caching and error handling
-- Code generation for type-safe GraphQL operations
-- Real-time updates via GraphQL subscriptions (future)
+---
 
-### Database Strategy (Prisma)
-
-Prisma ORM with PostgreSQL:
-- Schema-first database design with Prisma Schema
-- Type-safe database operations
-- Automatic migrations and version control
-- Built-in connection pooling and query optimization
-
-## Key Configuration Files
-
-**Frontend**:
-- `.env` - Environment variables (API URLs, feature flags)
-- `package.json` - Dependencies and build scripts
-
-**Backend**:
-- `appsettings.json` - Database connections and API keys
-- `Makefile` - Development commands
-- `.env` - Environment variables for local development
-
-## Testing Strategy
-
-**Frontend**: Jest and React Testing Library
-**Backend**: xUnit with ASP.NET Core testing utilities
-
-## External Integrations
-
-- **OpenAI API**: GPT-4o-mini for food nutritional analysis
-- **Database**: Railway PostgreSQL (zero-configuration deployment)
-- **Deployment**: GitHub Pages (frontend) + Railway (backend + database)
-- **Development**: Local development with hot reload and Railway staging
-
-## Development Workflow
-
-1. Both frontend and backend can be developed independently
-2. Frontend uses mock API by default for offline development
-3. Backend uses PostgreSQL (can be local or hosted)
-4. All API contracts are strongly typed in both TypeScript and C#
-
-## Common Patterns
-
-**Backend**:
-- Ports and Adapters pattern for external dependencies
-- Repository pattern for data access
-- Minimal APIs with route-based organization
-- Environment-based configuration
-
-**Frontend**:
-- Service layer abstraction for API calls
-- Custom hooks for state management
-- Material-UI component composition
-- Responsive design with breakpoint-aware layouts
+*This template helps create a development environment where AI assistants can work effectively within your project's context and standards.*
