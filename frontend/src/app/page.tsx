@@ -6,16 +6,6 @@ export default function HomePage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        {/* Page Header */}
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Today&apos;s Food Log
-          </h2>
-          <p className="text-gray-600">
-            Track your nutrition and stay on top of your goals
-          </p>
-        </div>
-
         {/* Nutrition Summary Card */}
         <Card>
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
