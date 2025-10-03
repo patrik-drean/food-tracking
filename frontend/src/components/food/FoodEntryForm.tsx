@@ -18,7 +18,7 @@ const ADD_FOOD_MUTATION = `
       description
       calories
       protein
-      carbohydrates
+      carbs
       fat
       createdAt
     }
@@ -66,10 +66,12 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
       const result = await addFoodMutation({
         input: {
           description: data.description,
-          calories: hasNutrition ? nutritionData?.calories : null,
-          protein: hasNutrition ? nutritionData?.protein : null,
-          carbohydrates: hasNutrition ? nutritionData?.carbohydrates : null,
-          fat: hasNutrition ? nutritionData?.fat : null,
+          nutrition: hasNutrition ? {
+            calories: nutritionData?.calories ?? null,
+            protein: nutritionData?.protein ?? null,
+            carbs: nutritionData?.carbohydrates ?? null,
+            fat: nutritionData?.fat ?? null,
+          } : null,
         },
       });
 

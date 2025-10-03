@@ -35,7 +35,7 @@ jobs:
         working-directory: ./frontend
         env:
           NODE_ENV: production
-          NEXT_PUBLIC_GRAPHQL_ENDPOINT: ${{ secrets.NEXT_PUBLIC_GRAPHQL_ENDPOINT }}
+          NEXT_PUBLIC_GRAPHQL_ENDPOINT: ${{ vars.NEXT_PUBLIC_GRAPHQL_ENDPOINT }}
         run: npm run build
 
       - name: Upload artifact
