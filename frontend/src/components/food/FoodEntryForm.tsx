@@ -200,7 +200,7 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
         <div className="relative">
           <Input
             {...register('description', {
-              onChange: (e) => {
+              onChange: () => {
                 setShowSuggestions(true);
               },
             })}
