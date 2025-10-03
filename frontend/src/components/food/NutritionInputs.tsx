@@ -1,6 +1,7 @@
 import { UseFormRegister, UseFormSetValue, UseFormWatch, FieldErrors } from 'react-hook-form';
 import { NumberInput } from '@/components/ui/NumberInput';
 import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
 import { FoodEntryFormData } from './FoodFormSchema';
 
 interface NutritionInputsProps {
@@ -8,10 +9,11 @@ interface NutritionInputsProps {
   errors?: FieldErrors<NonNullable<FoodEntryFormData['nutrition']>> | undefined;
   setValue: UseFormSetValue<FoodEntryFormData>;
   watch: UseFormWatch<FoodEntryFormData>;
+  aiSource?: 'AI_GENERATED' | 'CACHED' | null;
 }
 
 /**
- * Collapsible nutrition inputs component
+ * Collapsible nutrition inputs component with AI badge support
  * Shows calories, protein, carbs, fat in a 2x2 grid
  */
 export function NutritionInputs({
@@ -19,6 +21,7 @@ export function NutritionInputs({
   errors,
   setValue,
   watch,
+  aiSource,
 }: NutritionInputsProps) {
   const nutritionData = watch('nutrition');
 
@@ -36,9 +39,16 @@ export function NutritionInputs({
     <Card padding="sm" className="bg-gray-50 border-dashed border-2 animate-in slide-in-from-top-2 duration-300">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h4 className="text-sm font-medium text-gray-700">
-            Nutrition Information
-          </h4>
+          <div className="flex items-center gap-2">
+            <h4 className="text-sm font-medium text-gray-700">
+              Nutrition Information
+            </h4>
+            {aiSource && (
+              <Badge variant={aiSource === 'CACHED' ? 'secondary' : 'primary'} size="sm">
+                {aiSource === 'CACHED' ? '⚡ Cached' : '✨ AI Generated'}
+              </Badge>
+            )}
+          </div>
           {hasAnyValue && (
             <button
               type="button"
@@ -49,6 +59,16 @@ export function NutritionInputs({
             </button>
           )}
         </div>
+
+        {aiSource && (
+          <div className="p-2 bg-primary-50 border border-primary-200 rounded-md">
+            <p className="text-xs text-primary-800">
+              {aiSource === 'CACHED'
+                ? '⚡ These values were retrieved from cache (previously analyzed)'
+                : '✨ These values were estimated by AI - feel free to edit them if you have more accurate data'}
+            </p>
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-3">
           <NumberInput
@@ -84,9 +104,11 @@ export function NutritionInputs({
           />
         </div>
 
-        <p className="text-xs text-gray-500">
-          Optional: Add nutrition values manually or leave empty for AI estimates
-        </p>
+        {!aiSource && (
+          <p className="text-xs text-gray-500">
+            Leave fields empty to skip nutrition tracking
+          </p>
+        )}
       </div>
     </Card>
   );

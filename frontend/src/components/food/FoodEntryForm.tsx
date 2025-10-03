@@ -7,6 +7,8 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { NutritionInputs } from './NutritionInputs';
+import { AIAnalysisButton } from './AIAnalysisButton';
+import { LoadingNutritionState } from './LoadingNutritionState';
 import { FoodEntrySchema, type FoodEntryFormData } from './FoodFormSchema';
 import { useMutation } from 'urql';
 
@@ -25,17 +27,36 @@ const ADD_FOOD_MUTATION = `
   }
 `;
 
+// GraphQL mutation for AI nutrition analysis
+const ANALYZE_FOOD_NUTRITION_MUTATION = `
+  mutation AnalyzeFoodNutrition($description: String!) {
+    analyzeFoodNutrition(description: $description) {
+      calories
+      fat
+      carbs
+      protein
+      source
+      confidence
+    }
+  }
+`;
+
 interface FoodEntryFormProps {
   onSuccess?: () => void;
 }
 
 /**
- * Main food entry form component with inline expandable nutrition inputs
- * Implements Option 1: Clean default state with progressive disclosure
+ * Main food entry form component with AI nutrition analysis
+ * Implements AI-powered nutrition estimation with manual override option
  */
 export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
   const [showNutritionInputs, setShowNutritionInputs] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [hasAnalyzed, setHasAnalyzed] = useState(false);
+  const [aiSource, setAiSource] = useState<'AI_GENERATED' | 'CACHED' | null>(null);
+
   const [addFoodResult, addFoodMutation] = useMutation(ADD_FOOD_MUTATION);
+  const [analyzeResult, analyzeMutation] = useMutation(ANALYZE_FOOD_NUTRITION_MUTATION);
 
   const {
     register,
@@ -57,11 +78,52 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
     },
   });
 
+  const description = watch('description');
+
+  /**
+   * Handle AI analysis of food description
+   */
+  const handleAIAnalysis = async () => {
+    const trimmedDescription = description?.trim();
+
+    if (!trimmedDescription) {
+      return;
+    }
+
+    setIsAnalyzing(true);
+    setShowNutritionInputs(true);
+
+    try {
+      const result = await analyzeMutation({
+        description: trimmedDescription,
+      });
+
+      if (result.data?.analyzeFoodNutrition) {
+        const nutrition = result.data.analyzeFoodNutrition;
+
+        // Pre-fill nutrition inputs with AI results
+        setValue('nutrition.calories', nutrition.calories);
+        setValue('nutrition.fat', nutrition.fat);
+        setValue('nutrition.carbohydrates', nutrition.carbs);
+        setValue('nutrition.protein', nutrition.protein);
+
+        setHasAnalyzed(true);
+        setAiSource(nutrition.source as 'AI_GENERATED' | 'CACHED');
+      }
+    } catch (error) {
+      console.error('AI analysis failed:', error);
+      // Show error notification to user
+      alert('Failed to analyze nutrition. Please enter values manually or try again.');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   const onSubmit = async (data: FoodEntryFormData) => {
     try {
       const nutritionData = data.nutrition;
       const hasNutrition = nutritionData &&
-        Object.values(nutritionData).some(v => v !== undefined && v !== null && !isNaN(v as number));
+        Object.values(nutritionData).some((v) => v !== undefined && v !== null && !isNaN(v as number));
 
       const result = await addFoodMutation({
         input: {
@@ -78,6 +140,8 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
       if (result.data?.addFood) {
         reset();
         setShowNutritionInputs(false);
+        setHasAnalyzed(false);
+        setAiSource(null);
         onSuccess?.();
       }
     } catch (error) {
@@ -85,9 +149,7 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
     }
   };
 
-  const nutritionData = watch('nutrition');
-  const hasNutritionData = nutritionData &&
-    Object.values(nutritionData).some(v => v !== undefined && v !== null && !isNaN(v as number));
+  const canAnalyze = description && description.trim().length > 0 && !isAnalyzing;
 
   return (
     <Card>
@@ -101,42 +163,54 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
         <Input
           {...register('description')}
           label="Food Description"
-          placeholder="2 eggs with toast, 1 medium apple"
+          placeholder="e.g., 2 slices whole wheat toast, 1 large apple"
           error={errors.description?.message}
+          helpText="Include quantity and details for better AI estimates"
         />
 
-        <div className="space-y-3">
-          <Button
-            type="button"
-            variant="outline"
-            size="md"
-            onClick={() => setShowNutritionInputs(!showNutritionInputs)}
-            className="w-full justify-between"
-          >
-            <span>
-              {showNutritionInputs ? '− Hide' : '+ Add'} Nutrition Information
-            </span>
-            {hasNutritionData && (
-              <span className="ml-2 px-2 py-0.5 bg-primary-100 text-primary-700 text-xs rounded-full font-medium">
-                Custom values
-              </span>
-            )}
-          </Button>
+        {/* AI Analysis Button */}
+        <AIAnalysisButton
+          onClick={handleAIAnalysis}
+          isLoading={isAnalyzing}
+          disabled={!canAnalyze}
+          hasAnalyzed={hasAnalyzed}
+        />
 
-          {showNutritionInputs && (
+        {/* Show loading state while analyzing */}
+        {isAnalyzing && <LoadingNutritionState />}
+
+        {/* Show nutrition inputs when analysis is done or user wants manual entry */}
+        {!isAnalyzing && showNutritionInputs && (
+          <div className="space-y-3">
             <NutritionInputs
               register={register}
               errors={errors.nutrition}
               setValue={setValue}
               watch={watch}
+              aiSource={aiSource}
             />
-          )}
-        </div>
+          </div>
+        )}
 
-        {addFoodResult.error && (
+        {/* Manual entry toggle (only show if not analyzing and inputs not shown) */}
+        {!isAnalyzing && !showNutritionInputs && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowNutritionInputs(true)}
+            className="w-full"
+          >
+            Or enter nutrition manually
+          </Button>
+        )}
+
+        {(addFoodResult.error || analyzeResult.error) && (
           <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-sm text-red-600">
-              Failed to save food entry. Please try again.
+              {addFoodResult.error
+                ? 'Failed to save food entry. Please try again.'
+                : 'Failed to analyze nutrition. Please enter values manually.'}
             </p>
           </div>
         )}
@@ -146,7 +220,7 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
             type="submit"
             className="flex-1"
             isLoading={isSubmitting}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isAnalyzing}
           >
             {isSubmitting ? 'Saving...' : 'Add Food'}
           </Button>
@@ -157,8 +231,10 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
             onClick={() => {
               reset();
               setShowNutritionInputs(false);
+              setHasAnalyzed(false);
+              setAiSource(null);
             }}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isAnalyzing}
           >
             Clear
           </Button>
