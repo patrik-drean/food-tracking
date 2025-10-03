@@ -15,7 +15,7 @@ const TIMEZONE = 'America/Denver'; // Mountain Time (handles both MDT and MST au
 export function getStartOfDayMT(date?: string | Date): Date {
   const targetDate = date ? new Date(date) : new Date();
 
-  // Format the date in Mountain Time and parse it back
+  // Format the date in Mountain Time to get year, month, day
   const mtDateString = targetDate.toLocaleString('en-US', {
     timeZone: TIMEZONE,
     year: 'numeric',
@@ -26,17 +26,22 @@ export function getStartOfDayMT(date?: string | Date): Date {
   // Parse MM/DD/YYYY format
   const [month, day, year] = mtDateString.split('/');
 
-  // Create a date string that represents midnight in Mountain Time
-  // We need to manually calculate what UTC time corresponds to midnight MT
-  const midnightMT = new Date(`${year}-${month}-${day}T00:00:00`);
+  // Try both possible offsets (MST = -07:00, MDT = -06:00)
+  // The correct one will produce midnight when formatted back to MT
+  const mstDate = new Date(`${year}-${month}-${day}T00:00:00-07:00`);
+  const mdtDate = new Date(`${year}-${month}-${day}T00:00:00-06:00`);
 
-  // Get the timezone offset for Mountain Time on this date (handles DST)
-  const mtOffset = getMTOffset(midnightMT);
+  // Check which one actually represents midnight in MT
+  const mtFormatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: TIMEZONE,
+    hour: 'numeric',
+    hour12: false,
+  });
 
-  // Calculate UTC time that corresponds to midnight MT
-  const utcMidnight = new Date(midnightMT.getTime() - mtOffset);
+  const mstHour = parseInt(mtFormatter.format(mstDate));
+  const mdtHour = parseInt(mtFormatter.format(mdtDate));
 
-  return utcMidnight;
+  return mstHour === 0 ? mstDate : mdtDate;
 }
 
 /**
@@ -49,19 +54,6 @@ export function getEndOfDayMT(date?: string | Date): Date {
   const endOfDay = new Date(startOfDay);
   endOfDay.setDate(endOfDay.getDate() + 1);
   return endOfDay;
-}
-
-/**
- * Get the Mountain Time offset in milliseconds for a given date
- * This handles both MDT (-6 hours) and MST (-7 hours) automatically
- */
-function getMTOffset(date: Date): number {
-  // Create a date formatter for Mountain Time
-  const mtDate = new Date(date.toLocaleString('en-US', { timeZone: TIMEZONE }));
-  const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
-
-  // Calculate offset in milliseconds
-  return utcDate.getTime() - mtDate.getTime();
 }
 
 /**
