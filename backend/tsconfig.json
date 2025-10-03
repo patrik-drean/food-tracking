@@ -21,7 +21,8 @@
       "@/schema/*": ["./src/schema/*"],
       "@/services/*": ["./src/services/*"],
       "@/lib/*": ["./src/lib/*"],
-      "@/types/*": ["./src/types/*"]
+      "@/types/*": ["./src/types/*"],
+      "@/utils/*": ["./src/utils/*"]
     },
     "exactOptionalPropertyTypes": false,
     "noUncheckedIndexedAccess": true,

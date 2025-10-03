@@ -1,6 +1,8 @@
 import { builder } from '../builder';
 import { foodService } from '../../services/foodService';
 import { AddFoodInput, UpdateFoodNutritionInput, FoodType } from './Food';
+import { NutritionAnalysisType } from './NutritionAnalysis';
+import { nutritionAnalysisService } from '../../services/nutrition/NutritionAnalysisService';
 
 builder.mutationType({
   fields: (t) => ({
@@ -29,6 +31,24 @@ builder.mutationType({
       },
       resolve: async (_parent, args) => {
         return foodService.deleteFood(args.id);
+      },
+    }),
+    analyzeFoodNutrition: t.field({
+      type: NutritionAnalysisType,
+      args: {
+        description: t.arg.string({ required: true }),
+      },
+      resolve: async (_parent, args) => {
+        try {
+          const result = await nutritionAnalysisService.analyzeFoodNutrition(args.description);
+          return result;
+        } catch (error) {
+          throw new Error(
+            error instanceof Error
+              ? error.message
+              : 'Failed to analyze food nutrition'
+          );
+        }
       },
     }),
   }),
