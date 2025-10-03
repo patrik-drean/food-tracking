@@ -6,8 +6,8 @@ query TodaysFoods {
   }
 }
 
-query RecentFoods($limit: Int) {
-  recentFoods(limit: $limit) {
+query RecentFoods($limit: Int, $search: String) {
+  recentFoods(limit: $limit, search: $search) {
     ...FoodFragment
   }
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Card } from '@/components/ui/Card';
@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/Input';
 import { NutritionInputs } from './NutritionInputs';
 import { AIAnalysisButton } from './AIAnalysisButton';
 import { LoadingNutritionState } from './LoadingNutritionState';
+import { FoodSuggestionDropdown } from './FoodSuggestionDropdown';
+import { useFoodSuggestions } from './hooks/useFoodSuggestions';
 import { FoodEntrySchema, type FoodEntryFormData } from './FoodFormSchema';
 import { useMutation } from 'urql';
 
@@ -46,14 +48,18 @@ interface FoodEntryFormProps {
 }
 
 /**
- * Main food entry form component with AI nutrition analysis
+ * Main food entry form component with AI nutrition analysis and food suggestions
  * Implements AI-powered nutrition estimation with manual override option
+ * Includes smart typeahead suggestions from food history
  */
 export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
   const [showNutritionInputs, setShowNutritionInputs] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
   const [aiSource, setAiSource] = useState<'AI_GENERATED' | 'CACHED' | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const [addFoodResult, addFoodMutation] = useMutation(ADD_FOOD_MUTATION);
   const [analyzeResult, analyzeMutation] = useMutation(ANALYZE_FOOD_NUTRITION_MUTATION);
@@ -79,6 +85,39 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
   });
 
   const description = watch('description');
+
+  // Get food suggestions based on input
+  const { suggestions, isLoading: suggestionsLoading } = useFoodSuggestions(
+    description || '',
+    {
+      minLength: 2,
+      debounceMs: 300,
+      maxResults: 10,
+    }
+  );
+
+  /**
+   * Handle selecting a food from suggestions
+   */
+  const handleSelectSuggestion = (food: any) => {
+    // Set description
+    setValue('description', food.description);
+
+    // Pre-fill nutrition if available
+    if (food.calories || food.protein || food.carbs || food.fat) {
+      setValue('nutrition.calories', food.calories || undefined);
+      setValue('nutrition.fat', food.fat || undefined);
+      setValue('nutrition.carbohydrates', food.carbs || undefined);
+      setValue('nutrition.protein', food.protein || undefined);
+
+      setShowNutritionInputs(true);
+      setHasAnalyzed(true);
+      setAiSource('CACHED'); // Indicate it's from history
+    }
+
+    setShowSuggestions(false);
+    inputRef.current?.blur();
+  };
 
   /**
    * Handle AI analysis of food description
@@ -160,13 +199,31 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
           </h3>
         </div>
 
-        <Input
-          {...register('description')}
-          label="Food Description"
-          placeholder="e.g., 2 slices whole wheat toast, 1 large apple"
-          error={errors.description?.message}
-          helpText="Include quantity and details for better AI estimates"
-        />
+        {/* Food description input with typeahead */}
+        <div className="relative">
+          <Input
+            {...register('description')}
+            ref={inputRef}
+            label="Food Description"
+            placeholder="e.g., 2 slices whole wheat toast, 1 large apple"
+            error={errors.description?.message}
+            helpText="Start typing to see suggestions from your history"
+            onFocus={() => setShowSuggestions(true)}
+            onChange={(e) => {
+              register('description').onChange(e);
+              setShowSuggestions(true);
+            }}
+          />
+
+          {/* Suggestion dropdown */}
+          <FoodSuggestionDropdown
+            suggestions={suggestions}
+            isLoading={suggestionsLoading}
+            onSelect={handleSelectSuggestion}
+            onClose={() => setShowSuggestions(false)}
+            isOpen={showSuggestions && (suggestions.length > 0 || suggestionsLoading)}
+          />
+        </div>
 
         {/* AI Analysis Button */}
         <AIAnalysisButton

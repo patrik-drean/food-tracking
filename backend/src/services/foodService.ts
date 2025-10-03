@@ -35,8 +35,16 @@ export const foodService = {
     });
   },
 
-  async getRecentFoods(limit: number = 10) {
+  async getRecentFoods(limit: number = 10, search?: string | null) {
     return prisma.food.findMany({
+      where: search
+        ? {
+            description: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          }
+        : undefined,
       take: limit,
       orderBy: {
         createdAt: 'desc',
