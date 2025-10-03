@@ -1,6 +1,8 @@
+'use client';
+
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { FoodEntryForm } from '@/components/food/FoodEntryForm';
 
 export default function HomePage() {
   return (
@@ -35,15 +37,11 @@ export default function HomePage() {
           </div>
         </Card>
 
-        {/* Quick Actions */}
-        <div className="flex gap-3">
-          <Button className="flex-1">
-            Add Food Entry
-          </Button>
-          <Button variant="outline">
-            View History
-          </Button>
-        </div>
+        {/* Food Entry Form */}
+        <FoodEntryForm onSuccess={() => {
+          console.log('Food added successfully!');
+          // TODO: Refresh food list when implemented in TASK-006
+        }} />
 
         {/* Food Log */}
         <Card>
@@ -52,7 +50,6 @@ export default function HomePage() {
           </h3>
           <div className="text-center py-12 text-gray-500">
             <p className="mb-2">No food entries yet today</p>
-            <p className="text-sm">Add your first meal to get started</p>
           </div>
         </Card>
       </div>
