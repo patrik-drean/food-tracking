@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Card } from '@/components/ui/Card';
@@ -59,8 +59,6 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
   const [aiSource, setAiSource] = useState<'AI_GENERATED' | 'CACHED' | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  const inputRef = useRef<HTMLInputElement>(null);
-
   const [addFoodResult, addFoodMutation] = useMutation(ADD_FOOD_MUTATION);
   const [analyzeResult, analyzeMutation] = useMutation(ANALYZE_FOOD_NUTRITION_MUTATION);
 
@@ -76,10 +74,10 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
     defaultValues: {
       description: '',
       nutrition: {
-        calories: undefined,
-        protein: undefined,
-        carbohydrates: undefined,
-        fat: undefined,
+        calories: 0,
+        protein: 0,
+        carbohydrates: 0,
+        fat: 0,
       },
     },
   });
@@ -105,10 +103,10 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
 
     // Pre-fill nutrition if available
     if (food.calories || food.protein || food.carbs || food.fat) {
-      setValue('nutrition.calories', food.calories || undefined);
-      setValue('nutrition.fat', food.fat || undefined);
-      setValue('nutrition.carbohydrates', food.carbs || undefined);
-      setValue('nutrition.protein', food.protein || undefined);
+      setValue('nutrition.calories', food.calories || 0);
+      setValue('nutrition.fat', food.fat || 0);
+      setValue('nutrition.carbohydrates', food.carbs || 0);
+      setValue('nutrition.protein', food.protein || 0);
 
       setShowNutritionInputs(true);
       setHasAnalyzed(true);
@@ -116,7 +114,6 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
     }
 
     setShowSuggestions(false);
-    inputRef.current?.blur();
   };
 
   /**
@@ -202,17 +199,15 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
         {/* Food description input with typeahead */}
         <div className="relative">
           <Input
-            {...register('description')}
-            ref={inputRef}
+            {...register('description', {
+              onChange: (e) => {
+                setShowSuggestions(true);
+              },
+            })}
             label="Food Description"
             placeholder="e.g., 2 slices whole wheat toast, 1 large apple"
             error={errors.description?.message}
-            helpText="Start typing to see suggestions from your history"
             onFocus={() => setShowSuggestions(true)}
-            onChange={(e) => {
-              register('description').onChange(e);
-              setShowSuggestions(true);
-            }}
           />
 
           {/* Suggestion dropdown */}

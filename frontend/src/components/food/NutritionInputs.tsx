@@ -60,16 +60,6 @@ export function NutritionInputs({
           )}
         </div>
 
-        {aiSource && (
-          <div className="p-2 bg-primary-50 border border-primary-200 rounded-md">
-            <p className="text-xs text-primary-800">
-              {aiSource === 'CACHED'
-                ? '⚡ These values were retrieved from cache (previously analyzed)'
-                : '✨ These values were estimated by AI - feel free to edit them if you have more accurate data'}
-            </p>
-          </div>
-        )}
-
         <div className="grid grid-cols-2 gap-3">
           <NumberInput
             {...register('nutrition.calories', { valueAsNumber: true })}

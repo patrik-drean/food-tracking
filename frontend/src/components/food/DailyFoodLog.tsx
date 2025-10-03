@@ -90,7 +90,7 @@ export function DailyFoodLog() {
     );
   }
 
-  const foods: Food[] = data?.todaysFoods || [];
+  const foods: Food[] = (data?.todaysFoods || []).slice().reverse();
   const totalNutrition = calculateTotalNutrition(foods);
 
   if (foods.length === 0) {
