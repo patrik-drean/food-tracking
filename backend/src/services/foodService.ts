@@ -91,4 +91,10 @@ export const foodService = {
       },
     });
   },
+
+  async deleteFood(id: string) {
+    return prisma.food.delete({
+      where: { id },
+    });
+  },
 };

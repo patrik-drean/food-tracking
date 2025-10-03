@@ -10,6 +10,8 @@ export { NumberInput } from './ui/NumberInput';
 export { Card } from './ui/Card';
 export { LoadingSpinner } from './ui/LoadingSpinner';
 export { ErrorMessage } from './ui/ErrorMessage';
+export { Badge } from './ui/Badge';
+export { Modal } from './ui/Modal';
 
 // Food Components
 export { FoodEntryForm } from './food/FoodEntryForm';

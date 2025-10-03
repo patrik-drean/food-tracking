@@ -22,5 +22,14 @@ builder.mutationType({
         return foodService.updateFoodNutrition(args.input);
       },
     }),
+    deleteFood: t.field({
+      type: FoodType,
+      args: {
+        id: t.arg.string({ required: true }),
+      },
+      resolve: async (_parent, args) => {
+        return foodService.deleteFood(args.id);
+      },
+    }),
   }),
 });
