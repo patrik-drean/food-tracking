@@ -1,12 +1,13 @@
 'use client';
 
 import { useQuery, useMutation } from 'urql';
-import { 
-  TodaysFoodsDocument, 
+import {
+  TodaysFoodsDocument,
   AddFoodDocument,
-  Food 
+  Food
 } from '@/generated/graphql';
 import { useGraphQLState } from '@/hooks/useGraphQLState';
+import { formatTimeMT } from '@/lib/timezone';
 import { useState } from 'react';
 
 export default function TestGraphQLPage() {
@@ -100,7 +101,7 @@ export default function TestGraphQLPage() {
                     </div>
                   </div>
                   <div className="text-xs text-gray-400">
-                    {food.isManual ? 'Manual' : 'AI'} • {new Date(food.createdAt).toLocaleTimeString()}
+                    {food.isManual ? 'Manual' : 'AI'} • {formatTimeMT(food.createdAt)}
                   </div>
                 </div>
               </div>

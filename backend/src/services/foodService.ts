@@ -1,4 +1,5 @@
 import { prisma } from '../lib/prisma';
+import { getTodayRangeMT, getStartOfDayMT, getEndOfDayMT } from '../lib/timezone';
 
 interface NutritionInput {
   calories?: number | null;
@@ -19,16 +20,13 @@ interface UpdateFoodNutritionInput {
 
 export const foodService = {
   async getTodaysFoods() {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const { start, end } = getTodayRangeMT();
 
     return prisma.food.findMany({
       where: {
         createdAt: {
-          gte: today,
-          lt: tomorrow,
+          gte: start,
+          lt: end,
         },
       },
       orderBy: {
@@ -78,16 +76,14 @@ export const foodService = {
   },
 
   async getFoodsByDate(date: string) {
-    const targetDate = new Date(date);
-    targetDate.setHours(0, 0, 0, 0);
-    const nextDate = new Date(targetDate);
-    nextDate.setDate(nextDate.getDate() + 1);
+    const start = getStartOfDayMT(date);
+    const end = getEndOfDayMT(date);
 
     return prisma.food.findMany({
       where: {
         createdAt: {
-          gte: targetDate,
-          lt: nextDate,
+          gte: start,
+          lt: end,
         },
       },
       orderBy: {
