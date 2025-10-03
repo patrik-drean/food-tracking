@@ -11,14 +11,3 @@ mutation UpdateFoodNutrition($input: UpdateFoodNutritionInput!) {
     ...FoodFragment
   }
 }
-
-mutation AnalyzeFoodNutrition($description: String!) {
-  analyzeFoodNutrition(description: $description) {
-    calories
-    fat
-    carbs
-    protein
-    source
-    confidence
-  }
-}
