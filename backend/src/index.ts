@@ -15,7 +15,8 @@ const yoga = createYoga({
   }),
   cors: {
     origin: process.env.FRONTEND_URL?.split(',') || [
-      'http://localhost:3000'
+      'http://localhost:3000',
+      'https://patrik-drean.github.io'
     ],
     credentials: true,
   },
