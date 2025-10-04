@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { NutritionInputs } from './NutritionInputs';
 import { AIAnalysisButton } from './AIAnalysisButton';
 import { LoadingNutritionState } from './LoadingNutritionState';
@@ -208,6 +209,7 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
             placeholder="2 slices whole wheat toast"
             error={errors.description?.message}
             onFocus={() => setShowSuggestions(true)}
+            rightIcon={suggestionsLoading ? <LoadingSpinner size="sm" /> : undefined}
           />
 
           {/* Suggestion dropdown */}
@@ -216,7 +218,7 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
             isLoading={suggestionsLoading}
             onSelect={handleSelectSuggestion}
             onClose={() => setShowSuggestions(false)}
-            isOpen={showSuggestions && (suggestions.length > 0 || suggestionsLoading)}
+            isOpen={showSuggestions && suggestions.length > 0}
           />
         </div>
 
