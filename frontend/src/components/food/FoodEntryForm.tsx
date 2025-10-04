@@ -205,7 +205,7 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
               },
             })}
             label="Food Description"
-            placeholder="e.g., 2 slices whole wheat toast, 1 large apple"
+            placeholder="2 slices whole wheat toast"
             error={errors.description?.message}
             onFocus={() => setShowSuggestions(true)}
           />
