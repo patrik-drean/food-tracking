@@ -10,13 +10,16 @@ interface NutritionSummaryProps {
 }
 
 const DAILY_TARGETS = {
-  calories: 2000,
-  protein: 150,
-  carbs: 250,
-  fat: 65,
+  calories: 2600,
+  protein: 170,
+  carbs: 310,
+  fat: 75,
 };
 
 export function NutritionSummary({ nutrition }: NutritionSummaryProps) {
+  const caloriesGoalMet = nutrition.calories < DAILY_TARGETS.calories;
+  const proteinGoalMet = nutrition.protein >= DAILY_TARGETS.protein;
+  const fatGoalMet = nutrition.fat < DAILY_TARGETS.fat;
 
   return (
     <Card>
@@ -29,14 +32,18 @@ export function NutritionSummary({ nutrition }: NutritionSummaryProps) {
           <p className="text-2xl font-bold text-nutrition-calories">
             {Math.round(nutrition.calories)}
           </p>
-          <p className="text-xs text-gray-400">/ {DAILY_TARGETS.calories} goal</p>
+          <p className={`text-xs ${caloriesGoalMet ? 'text-green-600' : 'text-gray-400'}`}>
+            / {DAILY_TARGETS.calories} goal
+          </p>
         </div>
         <div>
           <p className="text-sm text-gray-500 mb-1">Protein</p>
           <p className="text-2xl font-bold text-nutrition-protein">
             {Math.round(nutrition.protein)}g
           </p>
-          <p className="text-xs text-gray-400">/ {DAILY_TARGETS.protein}g goal</p>
+          <p className={`text-xs ${proteinGoalMet ? 'text-green-600' : 'text-gray-400'}`}>
+            / {DAILY_TARGETS.protein}g goal
+          </p>
         </div>
         <div>
           <p className="text-sm text-gray-500 mb-1">Carbs</p>
@@ -50,7 +57,9 @@ export function NutritionSummary({ nutrition }: NutritionSummaryProps) {
           <p className="text-2xl font-bold text-nutrition-fat">
             {Math.round(nutrition.fat)}g
           </p>
-          <p className="text-xs text-gray-400">/ {DAILY_TARGETS.fat}g goal</p>
+          <p className={`text-xs ${fatGoalMet ? 'text-green-600' : 'text-gray-400'}`}>
+            / {DAILY_TARGETS.fat}g goal
+          </p>
         </div>
       </div>
     </Card>
