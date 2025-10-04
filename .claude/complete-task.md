@@ -94,91 +94,129 @@ Follow the testing strategies defined in your AI documentation:
    - Write service tests for API integration
    - Mock external dependencies according to your testing guidelines
 
-### Phase 5: Documentation & Cleanup
-1. **Code Documentation**: Add JSDoc comments for complex functions
-2. **API Documentation**: Update endpoint documentation
+### Phase 5: Quality Verification
+1. **Run Tests**: Execute all test suites and ensure they pass
+   ```bash
+   # Use commands from CLAUDE.md
+   [test command]          # Run all tests with coverage
+   ```
+
+2. **Run Linting**: Check code quality and style
+   ```bash
+   [lint command]          # Lint code following project standards
+   ```
+
+3. **Build Verification**: Ensure the application builds successfully
+   ```bash
+   [build command]         # Build for production
+   ```
+
+4. **Fix Any Issues**: Address test failures, linting errors, or build issues before proceeding
+
+### Phase 6: Documentation & Cleanup
+1. **Code Documentation**: Add comments for complex functions following project standards
+2. **API Documentation**: Update endpoint documentation if applicable
 3. **Component Documentation**: Document component props and usage
-4. **Update README**: Add any new setup requirements
+4. **Update README**: Add any new setup requirements if needed
 
 ## Code Quality Standards
 
-### Frontend Code Standards
-- Use TypeScript interfaces for all props and data structures
-- Follow Material-UI theming patterns
-- Implement proper error boundaries and loading states
-- Use semantic HTML and ARIA labels for accessibility
-- Follow existing naming conventions (PascalCase for components)
+Follow the quality standards defined in `docs/ai-guidelines/QUALITY_GUIDELINES.md`. Key principles:
 
-### Backend Code Standards
-- Follow Clean Architecture separation of concerns
-- Use async/await patterns consistently
-- Implement proper error handling and logging
-- Use Entity Framework conventions for database operations
-- Follow existing namespace and project organization
+### General Code Quality
+- **Follow established patterns** from the project's AI guidelines
+- **Maintain consistency** with existing codebase conventions
+- **Implement proper error handling** according to project standards
+- **Add appropriate logging** following project logging patterns
+- **Write self-documenting code** with clear variable and function names
+
+### Frontend Code Quality
+- Follow **component patterns** defined in `docs/ai-guidelines/FRONTEND_GUIDELINES.md`
+- Use **type definitions** according to project TypeScript/type standards
+- Implement **error boundaries and loading states** per project patterns
+- Follow **accessibility standards** (semantic HTML, ARIA labels)
+- Adhere to **naming conventions** established in the codebase
+
+### Backend Code Quality
+- Follow **architecture patterns** defined in `docs/ai-guidelines/BACKEND_GUIDELINES.md`
+- Use **consistent async/await patterns** per project standards
+- Implement **proper error handling** according to established patterns
+- Follow **database conventions** defined in `docs/ai-guidelines/DATABASE_GUIDELINES.md`
+- Maintain **proper separation of concerns** per architecture guidelines
 
 ### Testing Standards
-- Achieve >80% code coverage for new code
-- Test both happy path and error scenarios
-- Use appropriate mocking for external dependencies
-- Write descriptive test names and assertions
+- **Achieve test coverage goals** defined in `docs/ai-guidelines/QUALITY_GUIDELINES.md` (typically >80%)
+- **Test both happy path and error scenarios** for all new code
+- **Use appropriate mocking strategies** following project testing patterns
+- **Write clear, descriptive test names** that explain what is being tested
+- **Follow test organization** patterns from the project guidelines
+
+## Ask for User Input
+
+During task implementation, ask for user input when:
+
+1. **Ambiguity in implementation details**:
+   - Example: "The task specifies 'user notifications' but doesn't specify the delivery method. Should this be: (1) in-app notifications only, (2) email notifications, or (3) both?"
+
+2. **Multiple valid approaches exist**:
+   - Example: "This feature could be implemented with: (1) client-side filtering (faster but limited scalability) or (2) server-side filtering (better for large datasets). Which approach would you prefer?"
+
+3. **Critical architectural decisions not specified in task**:
+   - Example: "The task requires real-time updates but doesn't specify the approach. Should we use: (1) WebSocket connections, (2) Server-Sent Events, or (3) polling?"
+
+4. **Security or privacy implications discovered**:
+   - Example: "This feature will expose user email addresses. Should we: (1) hash/obfuscate emails in the UI, (2) require additional permissions, or (3) proceed as specified?"
+
+5. **Performance concerns identified**:
+   - Example: "Loading all records at once could impact performance with large datasets. Should I implement pagination or lazy loading even though it's not in the task spec?"
+
+6. **Missing dependencies or prerequisites**:
+   - Example: "This task requires authentication middleware that doesn't exist yet. Should I: (1) create basic auth middleware, (2) use a third-party library like Passport.js, or (3) wait for a separate auth task?"
+
+7. **Breaking changes discovered**:
+   - Example: "Implementing this feature requires changing the existing API response format, which could break existing clients. Should I: (1) version the API, (2) add the new fields alongside existing ones, or (3) coordinate a breaking change?"
+
+8. **Test failures unrelated to new code**:
+   - Example: "Existing tests are failing before my changes. Should I: (1) fix the existing tests, (2) skip them temporarily, or (3) investigate the root cause first?"
+
+9. **Build or linting errors in existing code**:
+   - Example: "The build is failing due to existing code issues unrelated to this task. Should I fix those issues as part of this task or address them separately?"
+
+10. **Unclear acceptance criteria**:
+    - Example: "Acceptance criteria says 'fast response time' but doesn't specify a target. What's the acceptable response time for this feature?"
+
+**How to ask for input**:
+- Present 2-3 specific options with clear trade-offs
+- Explain why the decision matters for this task
+- Provide a recommended approach based on project patterns
+- Make it easy for user to choose (numbered options)
+- Don't proceed with implementation until user responds
 
 ## Instructions
 
 When given a task to complete:
 
 1. **Start by reading the entire task document** to understand scope and requirements
-2. **Follow the implementation approach** outlined in the task
-3. **Implement systematically** from backend to frontend to tests
-4. **Check each acceptance criteria** as you complete it
-5. **Run all tests** and ensure they pass
-6. **Update the task document** to mark completed items and add implementation notes
+2. **Review AI guidelines** to understand established patterns for this project
+3. **Ask for user input** if any ambiguities or critical decisions arise
+4. **Follow the implementation approach** outlined in the task
+5. **Implement systematically** from backend to frontend to tests
+6. **Check each acceptance criteria** as you complete it
+7. **Run tests, linting, and build** to verify quality
+8. **Fix any issues** before marking the task complete
+9. **Update the task document** to mark completed items and add implementation notes
 
 ## Output Expectations
 
 Your implementation should result in:
 - ✅ **Working code** that meets all functional requirements
 - ✅ **Comprehensive tests** that verify the implementation
+- ✅ **All tests passing** with adequate coverage
+- ✅ **No linting errors** following project code standards
+- ✅ **Successful build** without errors or warnings
 - ✅ **Updated documentation** where specified
 - ✅ **All acceptance criteria met** and marked as complete
 - ✅ **Task status updated** to reflect completion progress
-
-## Common Implementation Patterns
-
-### API Endpoint Pattern
-```csharp
-app.MapPost("/api/entities", async (CreateEntityContract input, EntityService service) =>
-{
-    var model = EntityMapper.FromCreate(input);
-    var created = await service.CreateAsync(model);
-    return Results.Created($"/api/entities/{created.Id}", EntityMapper.ToContract(created));
-});
-```
-
-### React Component Pattern
-```typescript
-interface ComponentProps {
-  data: SomeType;
-  onAction: (id: string) => void;
-}
-
-export const Component: React.FC<ComponentProps> = ({ data, onAction }) => {
-  // Implementation
-};
-```
-
-### Service Pattern
-```typescript
-export const apiService = {
-  async createEntity(data: CreateEntityRequest): Promise<Entity> {
-    const response = await fetch('/api/entities', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    return response.json();
-  }
-};
-```
 
 ---
 
