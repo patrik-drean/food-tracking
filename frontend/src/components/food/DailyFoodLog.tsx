@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from 'urql';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -44,16 +44,30 @@ interface Food {
   createdAt: string;
 }
 
+interface DailyFoodLogProps {
+  // eslint-disable-next-line no-unused-vars
+  onRefetchReady?: (refetch: () => void) => void;
+}
+
 /**
  * Main daily food log component with real-time updates
  */
-export function DailyFoodLog() {
+export function DailyFoodLog({ onRefetchReady }: DailyFoodLogProps) {
   const [editingFood, setEditingFood] = useState<Food | null>(null);
   const [{ data, fetching, error }, reexecuteQuery] = useQuery({
     query: TODAYS_FOODS_QUERY,
     requestPolicy: 'cache-and-network',
   });
   const [, deleteMutation] = useMutation(DELETE_FOOD_MUTATION);
+
+  // Expose refetch function to parent component
+  useEffect(() => {
+    if (onRefetchReady) {
+      onRefetchReady(() => {
+        reexecuteQuery({ requestPolicy: 'network-only' });
+      });
+    }
+  }, [onRefetchReady, reexecuteQuery]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this food entry?')) return;
