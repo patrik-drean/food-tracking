@@ -218,6 +218,12 @@ This pull request implements the functionality that allows users to have the abi
 2. **Manual PR Creation**:
    If GitHub CLI is not available, provide the PR details for manual creation following the same concise format.
 
+3. **Return to Main Branch**:
+   ```bash
+   # After PR is successfully created, return to main branch
+   git checkout main
+   ```
+
 ### Phase 6: Task Documentation Update
 1. **Update Task Title**:
    ```markdown

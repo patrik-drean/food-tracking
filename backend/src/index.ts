@@ -1,6 +1,7 @@
 import { createYoga } from 'graphql-yoga'
 import { createServer } from 'node:http'
 import { schema } from './schema'
+import { createContext } from './schema/context'
 import { prisma } from './lib/prisma'
 import dotenv from 'dotenv'
 
@@ -10,9 +11,9 @@ dotenv.config()
 // Create GraphQL Yoga server
 const yoga = createYoga({
   schema,
-  context: async () => ({
-    prisma,
-  }),
+  context: async ({ request }) => {
+    return createContext(request);
+  },
   cors: {
     origin: process.env.FRONTEND_URL?.split(',') || [
       'http://localhost:3000',

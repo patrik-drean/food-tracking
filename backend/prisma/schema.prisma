@@ -3,52 +3,83 @@ generator client {
   provider = "prisma-client-js"
 }
 
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model Food {
-  id          String   @id @default(cuid())
-  description String   @db.VarChar(500)
+// User model for multi-user authentication
+model User {
+  id    String  @id @default(cuid())
+  email String  @unique @db.VarChar(255)
+  name  String? @db.VarChar(255)
+  image String? @db.Text
 
-  // Nutrition data (nullable for gradual entry)
-  calories    Float?   @db.DoublePrecision
-  fat         Float?   @db.DoublePrecision
-  carbs       Float?   @db.DoublePrecision
-  protein     Float?   @db.DoublePrecision
-
-  // Metadata
-  isManual    Boolean  @default(false)  // True if manually entered, false if AI-generated
-  aiModel     String?  @db.VarChar(50)  // Which AI model was used (e.g., "gpt-4o-mini")
+  // OAuth provider info
+  provider   String @default("google") @db.VarChar(50)
+  providerId String @db.VarChar(255) // Google user ID
 
   // Timestamps
   createdAt   DateTime @default(now()) @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @db.Timestamptz(6)
+  lastLoginAt DateTime @default(now()) @db.Timestamptz(6)
 
-  // Indexes for performance
-  @@index([createdAt])
-  @@index([description])
+  // Relations
+  foods Food[]
+
+  @@unique([provider, providerId])
+  @@index([email])
+  @@map("users")
+}
+
+model Food {
+  id          String @id @default(cuid())
+  description String @db.VarChar(500)
+
+  // User relationship (nullable during migration)
+  userId String? @db.VarChar(255)
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Nutrition data (nullable for gradual entry)
+  calories Float? @db.DoublePrecision
+  fat      Float? @db.DoublePrecision
+  carbs    Float? @db.DoublePrecision
+  protein  Float? @db.DoublePrecision
+
+  // Metadata
+  isManual Boolean @default(false) // True if manually entered, false if AI-generated
+  aiModel  String? @db.VarChar(50) // Which AI model was used (e.g., "gpt-4o-mini")
+
+  // Timestamps
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+
+  // Indexes for performance (updated with userId)
+  @@index([userId, createdAt])
+  @@index([userId, description])
   @@map("foods")
 }
 
 model FoodCache {
-  id              String   @id @default(cuid())
+  id String @id @default(cuid())
+
+  // User relationship (nullable for global cache)
+  userId String? @db.VarChar(255)
 
   // Cache key and metadata
-  descriptionHash String   @unique @db.VarChar(64)  // SHA-256 hash
-  originalDesc    String   @db.VarChar(500)         // For debugging/reference
+  descriptionHash String @db.VarChar(64) // SHA-256 hash
+  originalDesc    String @db.VarChar(500) // For debugging/reference
 
   // Cached nutrition data from AI
-  nutritionData   Json     // Store the full AI response
+  nutritionData Json // Store the full AI response
 
   // Cache management
-  aiModel         String   @db.VarChar(50)
-  createdAt       DateTime @default(now()) @db.Timestamptz(6)
-  lastUsed        DateTime @default(now()) @db.Timestamptz(6)
-  useCount        Int      @default(1)
+  aiModel   String   @db.VarChar(50)
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  lastUsed  DateTime @default(now()) @db.Timestamptz(6)
+  useCount  Int      @default(1)
 
-  @@index([lastUsed])  // For cache cleanup
+  @@unique([userId, descriptionHash])
+  @@index([lastUsed]) // For cache cleanup
   @@map("food_cache")
 }

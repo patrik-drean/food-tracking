@@ -30,11 +30,27 @@ Before implementing tasks, review the project documentation to understand establ
 When given a task document, follow this systematic approach:
 
 ### Phase 1: Analysis & Setup
-1. **Read the complete task document** thoroughly
-2. **Understand dependencies** and ensure prerequisites are met
-3. **Review technical specifications** and implementation details
-4. **Identify all files** that need to be created or modified
-5. **Plan the implementation order** based on dependencies
+1. **Sync with latest main branch** to ensure you have the most up-to-date code:
+   ```bash
+   # For backend changes
+   cd drean-property-api
+   git checkout main
+   git pull origin main
+   
+   # For frontend changes  
+   cd drean-property-ui
+   git checkout main
+   git pull origin main
+   
+   # Return to project root
+   cd ..
+   ```
+
+2. **Read the complete task document** thoroughly
+3. **Understand dependencies** and ensure prerequisites are met
+4. **Review technical specifications** and implementation details
+5. **Identify all files** that need to be created or modified
+6. **Plan the implementation order** based on dependencies
 
 ### Phase 2: Backend Implementation
 Follow the patterns defined in `docs/ai/BACKEND_GUIDELINES.md`:
@@ -155,34 +171,40 @@ Follow the quality standards defined in `docs/ai-guidelines/QUALITY_GUIDELINES.m
 
 During task implementation, ask for user input when:
 
-1. **Ambiguity in implementation details**:
+1. **Non-trivial UI updates or design decisions**:
+   - **CRITICAL**: For any UI changes that affect layout, styling, or user experience, always ask for user input first
+   - **Show examples when possible**: Use terminal commands to display current UI elements, show mockups, or describe visual changes
+   - Example: "This task requires updating the navigation menu. Here are the current options: [show current menu]. Should I: (1) add a new menu item at the end, (2) reorganize existing items, or (3) create a dropdown submenu?"
+   - Example: "The form layout needs updating. Current layout: [describe/show current]. Proposed options: (1) single column with larger fields, (2) two-column layout, or (3) tabbed sections. Which would you prefer?"
+
+2. **Ambiguity in implementation details**:
    - Example: "The task specifies 'user notifications' but doesn't specify the delivery method. Should this be: (1) in-app notifications only, (2) email notifications, or (3) both?"
 
-2. **Multiple valid approaches exist**:
+3. **Multiple valid approaches exist**:
    - Example: "This feature could be implemented with: (1) client-side filtering (faster but limited scalability) or (2) server-side filtering (better for large datasets). Which approach would you prefer?"
 
-3. **Critical architectural decisions not specified in task**:
+4. **Critical architectural decisions not specified in task**:
    - Example: "The task requires real-time updates but doesn't specify the approach. Should we use: (1) WebSocket connections, (2) Server-Sent Events, or (3) polling?"
 
-4. **Security or privacy implications discovered**:
+5. **Security or privacy implications discovered**:
    - Example: "This feature will expose user email addresses. Should we: (1) hash/obfuscate emails in the UI, (2) require additional permissions, or (3) proceed as specified?"
 
-5. **Performance concerns identified**:
+6. **Performance concerns identified**:
    - Example: "Loading all records at once could impact performance with large datasets. Should I implement pagination or lazy loading even though it's not in the task spec?"
 
-6. **Missing dependencies or prerequisites**:
+7. **Missing dependencies or prerequisites**:
    - Example: "This task requires authentication middleware that doesn't exist yet. Should I: (1) create basic auth middleware, (2) use a third-party library like Passport.js, or (3) wait for a separate auth task?"
 
-7. **Breaking changes discovered**:
+8. **Breaking changes discovered**:
    - Example: "Implementing this feature requires changing the existing API response format, which could break existing clients. Should I: (1) version the API, (2) add the new fields alongside existing ones, or (3) coordinate a breaking change?"
 
-8. **Test failures unrelated to new code**:
+9. **Test failures unrelated to new code**:
    - Example: "Existing tests are failing before my changes. Should I: (1) fix the existing tests, (2) skip them temporarily, or (3) investigate the root cause first?"
 
-9. **Build or linting errors in existing code**:
-   - Example: "The build is failing due to existing code issues unrelated to this task. Should I fix those issues as part of this task or address them separately?"
+10. **Build or linting errors in existing code**:
+    - Example: "The build is failing due to existing code issues unrelated to this task. Should I fix those issues as part of this task or address them separately?"
 
-10. **Unclear acceptance criteria**:
+11. **Unclear acceptance criteria**:
     - Example: "Acceptance criteria says 'fast response time' but doesn't specify a target. What's the acceptable response time for this feature?"
 
 **How to ask for input**:
@@ -190,7 +212,24 @@ During task implementation, ask for user input when:
 - Explain why the decision matters for this task
 - Provide a recommended approach based on project patterns
 - Make it easy for user to choose (numbered options)
+- **For UI changes**: Show current state and proposed options visually when possible
+- **Use terminal commands** to display current UI elements, show mockups, or describe visual changes
 - Don't proceed with implementation until user responds
+
+**Examples of showing UI changes in terminal**:
+```bash
+# Show current component structure
+find src/components -name "*.tsx" | head -10
+
+# Display current navigation structure
+grep -r "Navigation" src/components --include="*.tsx" -A 5
+
+# Show current styling patterns
+grep -r "sx=" src/components --include="*.tsx" | head -5
+
+# Display current form layouts
+grep -r "TextField\|Input" src/components --include="*.tsx" | head -5
+```
 
 ## Instructions
 

@@ -1,7 +1,9 @@
 'use client';
 
+import { LogoutButton } from '../auth/LogoutButton';
+
 /**
- * Minimal header component with app branding
+ * Minimal header component with app branding and user authentication
  * Sticky positioning for persistent navigation access
  */
 export function Header() {
@@ -14,6 +16,7 @@ export function Header() {
               Food Tracker
             </h1>
           </div>
+          <LogoutButton />
         </div>
       </div>
     </header>

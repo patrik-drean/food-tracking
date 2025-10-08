@@ -11,8 +11,8 @@ builder.mutationType({
       args: {
         input: t.arg({ type: AddFoodInput, required: true }),
       },
-      resolve: async (_parent, args) => {
-        return foodService.addFood(args.input);
+      resolve: async (_parent, args, context) => {
+        return foodService.addFood(context, args.input);
       },
     }),
     updateFoodNutrition: t.field({
@@ -20,8 +20,8 @@ builder.mutationType({
       args: {
         input: t.arg({ type: UpdateFoodNutritionInput, required: true }),
       },
-      resolve: async (_parent, args) => {
-        return foodService.updateFoodNutrition(args.input);
+      resolve: async (_parent, args, context) => {
+        return foodService.updateFoodNutrition(context, args.input);
       },
     }),
     deleteFood: t.field({
@@ -29,8 +29,8 @@ builder.mutationType({
       args: {
         id: t.arg.string({ required: true }),
       },
-      resolve: async (_parent, args) => {
-        return foodService.deleteFood(args.id);
+      resolve: async (_parent, args, context) => {
+        return foodService.deleteFood(context, args.id);
       },
     }),
     analyzeFoodNutrition: t.field({
