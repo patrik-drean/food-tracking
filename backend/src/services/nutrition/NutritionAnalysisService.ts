@@ -94,11 +94,27 @@ export class NutritionAnalysisService {
     // Parse JSON response
     try {
       const parsed = JSON.parse(content);
+
+      // Extract and validate each field exists
+      const calories = parsed.calories ?? parsed.Calories;
+      const fat = parsed.fat ?? parsed.Fat;
+      const carbs = parsed.carbs ?? parsed.carbohydrates ?? parsed.Carbs ?? parsed.Carbohydrates;
+      const protein = parsed.protein ?? parsed.Protein;
+
+      // Log if any fields are missing for debugging
+      if (calories === undefined || fat === undefined || carbs === undefined || protein === undefined) {
+        console.error('OpenAI response missing fields:', {
+          rawResponse: content,
+          parsed,
+          extracted: { calories, fat, carbs, protein }
+        });
+      }
+
       return {
-        calories: Number(parsed.calories),
-        fat: Number(parsed.fat),
-        carbs: Number(parsed.carbs || parsed.carbohydrates),
-        protein: Number(parsed.protein),
+        calories: Number(calories) || 0,
+        fat: Number(fat) || 0,
+        carbs: Number(carbs) || 0,
+        protein: Number(protein) || 0,
       };
     } catch (parseError) {
       console.error('Failed to parse OpenAI response:', content);
@@ -137,17 +153,32 @@ Return ONLY valid JSON with these four numeric fields. Do not include explanatio
    * Validate nutrition data is within reasonable ranges
    */
   private validateNutritionData(data: NutritionData): void {
+    // Check for NaN or non-finite values
+    if (!Number.isFinite(data.calories)) {
+      throw new Error('Invalid calories value: must be a number');
+    }
+    if (!Number.isFinite(data.fat)) {
+      throw new Error('Invalid fat value: must be a number');
+    }
+    if (!Number.isFinite(data.carbs)) {
+      throw new Error('Invalid carbs value: must be a number');
+    }
+    if (!Number.isFinite(data.protein)) {
+      throw new Error('Invalid protein value: must be a number');
+    }
+
+    // Check reasonable ranges
     if (data.calories < 0 || data.calories > 10000) {
-      throw new Error('Invalid calories value');
+      throw new Error('Invalid calories value: must be between 0 and 10000');
     }
     if (data.fat < 0 || data.fat > 1000) {
-      throw new Error('Invalid fat value');
+      throw new Error('Invalid fat value: must be between 0 and 1000');
     }
     if (data.carbs < 0 || data.carbs > 1000) {
-      throw new Error('Invalid carbs value');
+      throw new Error('Invalid carbs value: must be between 0 and 1000');
     }
     if (data.protein < 0 || data.protein > 1000) {
-      throw new Error('Invalid protein value');
+      throw new Error('Invalid protein value: must be between 0 and 1000');
     }
   }
 
