@@ -410,6 +410,41 @@ Based on verification outcome:
 - If **NEEDS FIXES**: List what needs to be fixed and mark task as "In Review"
 - If **REJECTED**: Document major issues and mark task for rework
 
+### Update Task and PRD with Decisions
+
+After completing verification, update both the task document and related PRD:
+
+1. **Task Document Updates**:
+   - Add any design decisions made during verification to the Implementation Notes
+   - Document any scope changes or clarifications
+   - Update acceptance criteria if they were refined during verification
+   - Note any technical debt or follow-up tasks identified
+
+2. **PRD Updates**:
+   - Update the related PRD with any changes to requirements or acceptance criteria
+   - Document any new insights about user needs or technical constraints
+   - Add notes about implementation decisions that affect future tasks
+   - Update related sections if verification revealed scope changes
+
+### Review and Update Upcoming Tasks
+
+After verification is complete, review upcoming related tasks:
+
+1. **Identify Related Tasks**:
+   - Find tasks in the same feature area or that depend on this task
+   - Look for tasks that might be affected by changes made during verification
+
+2. **Update Affected Tasks**:
+   - Adjust task descriptions if requirements changed
+   - Update acceptance criteria to reflect new decisions or patterns
+   - Add dependencies or prerequisites based on verification findings
+   - Note any technical decisions that impact future implementations
+
+3. **Document Cross-Task Impact**:
+   - In the verification summary, list any tasks that were updated
+   - Briefly explain what changed and why
+   - Link to updated task documents for traceability
+
 ## Error Handling
 
 If verification fails at any stage:
@@ -435,7 +470,9 @@ When given a completed task to verify:
 9. **Ask for user input** on borderline cases or unclear severity
 10. **Generate comprehensive verification report** with honest assessment
 11. **Update task document** with verification summary section
-12. **Provide clear deployment recommendation** with reasoning
+12. **Update task and related PRD** with any decisions or changes made during verification
+13. **Review and update upcoming tasks** that may be affected by verification findings
+14. **Provide clear deployment recommendation** with reasoning
 
 ## Output Expectations
 
@@ -447,6 +484,8 @@ Your verification should result in:
 - ✅ **Comprehensive verification report** with honest assessment
 - ✅ **User manual verification checklist** for final validation
 - ✅ **Task document updated** with verification summary section
+- ✅ **Task and PRD updated** with decisions and changes from verification
+- ✅ **Upcoming tasks reviewed and updated** based on verification findings
 - ✅ **Clear deployment recommendation** (Approved/Conditional/Needs Fixes/Rejected)
 - ✅ **Actionable feedback** for any issues found
 
