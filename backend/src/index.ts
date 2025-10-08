@@ -17,7 +17,8 @@ const yoga = createYoga({
   cors: {
     origin: process.env.FRONTEND_URL?.split(',') || [
       'http://localhost:3000',
-      'https://patrik-drean.github.io'
+      'https://patrik-drean.github.io',
+      'https://food-tracking-frontend.vercel.app'
     ],
     credentials: true,
   },
