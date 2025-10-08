@@ -15,13 +15,20 @@ export interface JWTPayload {
 }
 
 /**
+ * Lazy load jose module to avoid ESM/CommonJS issues
+ * Using Function constructor to prevent TypeScript from converting to require()
+ */
+const loadJose = new Function('return import("jose")');
+
+/**
  * Verify JWT token created by our /api/auth/token endpoint
  * This is a simple HS256 JWT, not NextAuth's encrypted JWE format
  */
 export async function verifyJWT(token: string): Promise<JWTPayload> {
   try {
-    // Dynamic import to handle ES module in CommonJS context
-    const { jwtVerify } = await import('jose');
+    // Dynamic import using Function constructor to prevent TypeScript optimization
+    const jose = await loadJose() as typeof import('jose');
+    const { jwtVerify } = jose;
 
     const { payload } = await jwtVerify(token, secret, {
       algorithms: ['HS256'],
