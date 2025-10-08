@@ -4,6 +4,7 @@ import { builder } from './builder';
 import './types/Food';
 import './types/NutritionAnalysis';
 import './types/User';
+import './types/MacroTargets';
 import './types/Query';
 import './types/Mutation';
 

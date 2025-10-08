@@ -25,7 +25,8 @@ model User {
   lastLoginAt DateTime @default(now()) @db.Timestamptz(6)
 
   // Relations
-  foods Food[]
+  foods        Food[]
+  macroTargets MacroTargets?
 
   @@unique([provider, providerId])
   @@index([email])
@@ -82,4 +83,24 @@ model FoodCache {
   @@unique([userId, descriptionHash])
   @@index([lastUsed]) // For cache cleanup
   @@map("food_cache")
+}
+
+// User's customizable macro targets
+model MacroTargets {
+  id     String @id @default(cuid())
+  userId String @unique @db.VarChar(255)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Daily nutrition targets
+  calories Float @db.DoublePrecision // Daily calorie target
+  protein  Float @db.DoublePrecision // Daily protein target (grams)
+  carbs    Float @db.DoublePrecision // Daily carbs target (grams)
+  fat      Float @db.DoublePrecision // Daily fat target (grams)
+
+  // Timestamps
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+
+  @@index([userId])
+  @@map("macro_targets")
 }
