@@ -18,6 +18,8 @@
     "db:studio": "prisma studio",
     "db:seed": "tsx src/lib/seed.ts",
     "db:reset": "prisma migrate reset --force",
+    "migrate:user-data": "tsx src/scripts/migrate-data-to-user.ts",
+    "verify:migration": "tsx src/scripts/verify-migration.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
