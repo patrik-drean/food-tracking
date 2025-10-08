@@ -54,6 +54,7 @@ export const authOptions: NextAuthOptions = {
         const result = await response.json();
 
         if (result.errors) {
+          // eslint-disable-next-line no-console
           console.error('Failed to create/update user:', result.errors);
           return false;
         }
@@ -65,6 +66,7 @@ export const authOptions: NextAuthOptions = {
 
         return true;
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error('Sign-in error:', error);
         return false;
       }

@@ -85,6 +85,7 @@ export function EditFoodModal({
         onSuccess();
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to update food:', error);
     }
   };

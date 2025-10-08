@@ -6,15 +6,16 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_GRAPHQL_ENDPOINT: process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:4000/graphql',
   },
-  // Static export configuration for GitHub Pages
-  output: process.env.NODE_ENV === 'production' ? 'export' : undefined,
-  trailingSlash: true,
+  // Note: Static export is disabled because NextAuth requires a server
+  // Deploy to a serverless platform like Vercel or Netlify instead of GitHub Pages
   images: {
-    unoptimized: process.env.NODE_ENV === 'production',
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
+    ],
   },
-  // Base path for GitHub Pages (if repo name is not username.github.io)
-  basePath: process.env.NODE_ENV === 'production' ? '/food-tracking' : '',
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/food-tracking/' : '',
 }
 
 module.exports = nextConfig

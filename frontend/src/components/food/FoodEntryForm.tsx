@@ -148,6 +148,7 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
         setAiSource(nutrition.source as 'AI_GENERATED' | 'CACHED');
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('AI analysis failed:', error);
       // Show error notification to user
       alert('Failed to analyze nutrition. Please enter values manually or try again.');
@@ -182,6 +183,7 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
         onSuccess?.();
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to add food:', error);
     }
   };

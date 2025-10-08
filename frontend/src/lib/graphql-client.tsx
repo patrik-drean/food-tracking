@@ -25,7 +25,10 @@ export function GraphQLProvider({ children }: GraphQLProviderProps) {
             setJwtToken(data.token);
           }
         })
-        .catch(err => console.error('Failed to get JWT token:', err));
+        .catch(err => {
+          // eslint-disable-next-line no-console
+          console.error('Failed to get JWT token:', err);
+        });
     } else {
       setJwtToken(null);
     }

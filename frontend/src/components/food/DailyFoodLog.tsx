@@ -76,6 +76,7 @@ export function DailyFoodLog({ onRefetchReady }: DailyFoodLogProps) {
       await deleteMutation({ id });
       reexecuteQuery({ requestPolicy: 'network-only' });
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to delete food:', error);
     }
   };

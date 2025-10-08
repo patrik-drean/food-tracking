@@ -1,5 +1,3 @@
-import { jwtVerify } from 'jose';
-
 const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET;
 
 if (!NEXTAUTH_SECRET) {
@@ -22,6 +20,9 @@ export interface JWTPayload {
  */
 export async function verifyJWT(token: string): Promise<JWTPayload> {
   try {
+    // Dynamic import to handle ES module in CommonJS context
+    const { jwtVerify } = await import('jose');
+
     const { payload } = await jwtVerify(token, secret, {
       algorithms: ['HS256'],
     });

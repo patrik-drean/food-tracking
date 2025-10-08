@@ -40,6 +40,7 @@ export default function TestGraphQLPage() {
       });
       setNewFood('');
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error('Error adding food:', err);
     } finally {
       setIsSubmitting(false);

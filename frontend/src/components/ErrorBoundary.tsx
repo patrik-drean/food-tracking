@@ -12,8 +12,9 @@ export function GraphQLErrorBoundary({
   fallback = <div>Something went wrong</div>
 }: ErrorBoundaryProps) {
   // Implementation would use React Error Boundary patterns
-  // For now, just return children. In a real implementation, 
+  // For now, just return children. In a real implementation,
   // this would catch errors and show the fallback
-  console.log('ErrorBoundary fallback available:', fallback);
+  // Suppress unused variable warning
+  void fallback;
   return <>{children}</>;
 }

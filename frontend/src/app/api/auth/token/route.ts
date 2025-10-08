@@ -3,9 +3,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { SignJWT } from 'jose';
 
 export async function GET(req: NextRequest) {
+  const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET;
+
+  if (!NEXTAUTH_SECRET) {
+    return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
+  }
+
   const token = await getToken({
     req,
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: NEXTAUTH_SECRET,
   });
 
   if (!token || !token.sub || !token.email) {
@@ -14,7 +20,7 @@ export async function GET(req: NextRequest) {
 
   // Create a simple JWT with just the user info
   // This will be verifiable by the backend using jose
-  const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
+  const secret = new TextEncoder().encode(NEXTAUTH_SECRET as string);
 
   const jwt = await new SignJWT({
     sub: token.sub,
