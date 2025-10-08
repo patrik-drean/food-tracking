@@ -28,7 +28,7 @@ Take a completed task implementation and perform comprehensive verification befo
 - **Accessibility standards** must be followed
 
 ### Deployment Process
-- **Frontend**: Deployed to GitHub Pages automatically on main branch
+- **Frontend**: Deployed to Vercel automatically on main branch push
 - **Backend**: Deployed to Railway on main branch push
 - **Database**: Migrations run automatically in production
 
