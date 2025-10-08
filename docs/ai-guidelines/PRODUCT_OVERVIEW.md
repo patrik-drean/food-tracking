@@ -63,7 +63,8 @@ Personal food tracking web application - Mobile-responsive Progressive Web App (
 - **Backend**: GraphQL Yoga Server with Pothos schema builder, TypeScript, Node.js 18+
 - **Database**: PostgreSQL with Prisma ORM, hosted on Railway
 - **External APIs**: OpenAI GPT-4o-mini for food nutrition analysis
-- **Deployment**: Frontend on GitHub Pages (static export), Backend on Railway with auto-deploy
+- **Authentication**: NextAuth.js with Google OAuth for multi-user support
+- **Deployment**: Frontend on Vercel (SSR with API routes), Backend on Railway with auto-deploy
 
 ## Domain-Specific Context
 
@@ -74,16 +75,18 @@ Personal food tracking web application - Mobile-responsive Progressive Web App (
 - **Accessibility**: WCAG 2.1 AA compliance for inclusive nutrition tracking
 
 ### Business Rules & Constraints
-- **Single User Application**: No multi-user features, authentication, or user management required
+- **Multi-User Application**: Google OAuth authentication with per-user data isolation
 - **Data Accuracy**: AI nutrition estimates must be manually reviewable and editable by user
 - **Food Entry Validation**: Food descriptions must be non-empty, nutrition values must be positive numbers
 - **Historical Data**: Food logs cannot be modified more than 7 days after entry (to maintain tracking integrity)
 - **API Rate Limits**: OpenAI API calls must be throttled and cached to manage costs
+- **Authentication**: All GraphQL queries require valid JWT authentication token
 
 ### External Integrations
 - **OpenAI GPT-4o-mini**: AI-powered food description analysis and nutrition estimation
 - **Railway Database**: PostgreSQL hosting with automated backups and scaling
-- **GitHub Pages**: Static site hosting for frontend deployment with CI/CD integration
+- **Google OAuth**: Authentication provider for secure multi-user access
+- **Vercel**: Serverless platform for frontend hosting with automatic deployments and SSR support
 
 ## Current Development Priorities
 
@@ -115,7 +118,7 @@ Personal food tracking web application - Mobile-responsive Progressive Web App (
 - **Branching Strategy**: Feature branches with Claude Code implementation, manual testing before main branch merge
 - **Code Review Process**: Self-review with comprehensive testing using Claude Code verification commands
 - **Testing Strategy**: Unit tests for business logic, integration tests for GraphQL endpoints, manual testing for UI flows
-- **Deployment Process**: Automated deployment via GitHub Actions (frontend) and Railway auto-deploy (backend)
+- **Deployment Process**: Automated deployment via Vercel (frontend) and Railway auto-deploy (backend)
 
 ---
 

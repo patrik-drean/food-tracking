@@ -318,21 +318,23 @@ type Mutation {
 **Phase 4 Learning**:
 - **Performance Optimization**: Bundle analysis, code splitting, lazy loading
 - **Responsive Design**: Advanced TailwindCSS patterns and mobile-first development
-- **Deployment**: GitHub Pages (frontend) + Railway (backend + PostgreSQL)
+- **Deployment**: Vercel (frontend with SSR) + Railway (backend + PostgreSQL)
+- **Authentication**: NextAuth.js with Google OAuth for multi-user support
 - **Environment Management**: Production environment variables and secrets
 
 ## Launch Plan
 
 ### Deployment Strategy
-- **Frontend**: GitHub Pages deployment from main branch
+- **Frontend**: Vercel deployment with SSR from main branch
 - **Backend**: Railway deployment with auto-deploy from GitHub
 - **Database**: Railway PostgreSQL with automatic provisioning
-- **Environment Variables**: OpenAI API key and database URL via Railway
+- **Authentication**: Google OAuth via NextAuth.js for multi-user access
+- **Environment Variables**: OpenAI API key and database URL via Railway, auth credentials via Vercel
 
 ### Success Criteria
-- **Functional**: Can log foods and see daily totals on mobile device
+- **Functional**: Can log foods and see daily totals on mobile device with authentication
 - **Learning**: Hands-on experience with all specified technologies
-- **Deployment**: Live application accessible on GitHub Pages
+- **Deployment**: Live application accessible on Vercel (https://food-tracking-frontend.vercel.app)
 - **Timeline**: Completed before 10/13/2025
 
 ### Post-Implementation Review
@@ -370,9 +372,9 @@ Return only valid JSON with this structure:
 **Database Choice**: Railway PostgreSQL for both development and production (with local SQLite option for offline development)
 
 **Deployment Strategy**:
-- **Frontend**: GitHub Pages (free, simple, integrated with repo)
+- **Frontend**: Vercel (serverless SSR, free tier for personal projects)
 - **Backend**: Railway (GraphQL server + PostgreSQL database)
-- **Cost**: ~$5-10/month total (Railway usage-based pricing)
+- **Cost**: Free tier for both platforms (Vercel hobby plan + Railway usage-based)
 
 **Why Railway for Backend**:
 - Zero-configuration PostgreSQL deployment

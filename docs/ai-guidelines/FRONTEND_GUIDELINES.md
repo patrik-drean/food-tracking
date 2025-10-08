@@ -294,9 +294,8 @@ npm run format           # Run Prettier
 npm run type-check       # Run TypeScript compiler check
 
 # Build
-npm run build            # Build for production
-npm run start            # Start production server
-npm run export           # Export static files for GitHub Pages
+npm run build            # Build for production (Vercel uses this automatically)
+npm run start            # Start production server locally
 ```
 
 ### Code Quality Tools
@@ -356,13 +355,10 @@ npm run lint
 # Type checking
 npm run type-check
 
-# Build for production
+# Build for production (Vercel deployment)
 npm run build
 
-# Export static files
-npm run export
-
-# Preview production build
+# Preview production build locally
 npm run start
 ```
 

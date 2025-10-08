@@ -5,12 +5,13 @@ This document provides Claude Code with comprehensive deployment and infrastruct
 ## Deployment Architecture
 
 ### Infrastructure Overview
-- **Frontend Hosting**: GitHub Pages (static export from Next.js 14)
+- **Frontend Hosting**: Vercel (Next.js 14 with server-side rendering and API routes)
 - **Backend Hosting**: Railway (GraphQL Yoga + Node.js with auto-deploy)
 - **Database Hosting**: PostgreSQL on Railway with automatic backups
-- **CDN**: GitHub Pages built-in CDN for static assets
+- **CDN**: Vercel Edge Network for global static asset delivery
 - **External APIs**: OpenAI GPT-4o-mini for nutrition analysis
-- **Monitoring**: Railway built-in monitoring + custom health checks
+- **Monitoring**: Railway + Vercel built-in monitoring + custom health checks
+- **Authentication**: NextAuth.js with Google OAuth (requires server-side rendering)
 
 ### Environment Strategy
 ```yaml
@@ -30,33 +31,63 @@ environments:
 
   production:
     purpose: "Live food tracking application"
-    frontend: "GitHub Pages static export"
+    frontend: "Vercel serverless deployment with SSR"
     backend: "Railway auto-deployed GraphQL API"
     database: "Railway PostgreSQL with automatic backups"
     external_apis: "OpenAI GPT-4o-mini production endpoints"
     logging_level: "WARN"
     features:
+      - Multi-user authentication with Google OAuth
       - Production nutrition analysis
       - Rate limiting enabled
       - Performance monitoring
       - Automated backups
+      - Edge caching via Vercel
 ```
 
 ## CI/CD Pipeline
 
-### GitHub Actions for Frontend (GitHub Pages)
+### Vercel Auto-Deploy for Frontend
+Vercel automatically deploys the frontend on every push to the main branch via GitHub integration.
+
+**Vercel Project Configuration:**
+- **Project Name**: `food-tracking-frontend`
+- **Framework**: Next.js 14
+- **Build Command**: `npm run build`
+- **Output Directory**: `.next` (default)
+- **Install Command**: `npm install`
+- **Root Directory**: `frontend`
+- **Node Version**: 20.x
+
+**Deployment Triggers:**
+- Push to `main` branch → Production deployment
+- Pull requests → Preview deployments
+- Manual deployments via Vercel dashboard
+
+**Build Configuration** (vercel.json - optional):
+```json
+{
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "framework": "nextjs",
+  "installCommand": "npm install"
+}
+```
+
+**Quality Checks** (can be added via GitHub Actions):
 ```yaml
-# .github/workflows/deploy-frontend.yml
-name: Deploy Frontend to GitHub Pages
+# .github/workflows/quality-checks.yml
+name: Quality Checks
 
 on:
+  pull_request:
+    paths: ['frontend/**']
   push:
     branches: [main]
     paths: ['frontend/**']
-  workflow_dispatch:
 
 jobs:
-  test-and-build:
+  quality:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -75,7 +106,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Quality checks
       - name: Run TypeScript type checking
         run: npm run type-check
 
@@ -84,43 +114,6 @@ jobs:
 
       - name: Run unit tests
         run: npm run test
-
-      - name: Run E2E tests
-        run: npm run test:e2e
-        env:
-          NEXT_PUBLIC_GRAPHQL_URL: ${{ vars.NEXT_PUBLIC_GRAPHQL_URL }}
-
-      # Build for GitHub Pages
-      - name: Build static export
-        run: npm run build:static
-        env:
-          NEXT_PUBLIC_GRAPHQL_URL: ${{ vars.NEXT_PUBLIC_GRAPHQL_URL }}
-          NEXT_PUBLIC_APP_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
-
-      # Deploy to GitHub Pages
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./frontend/out
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-  notify-backend:
-    needs: test-and-build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger cache warming
-        run: |
-          curl -X POST \
-            -H "Authorization: Bearer ${{ secrets.BACKEND_API_KEY }}" \
-            -H "Content-Type: application/json" \
-            -d '{"action": "warm_cache", "source": "frontend_deploy"}' \
-            ${{ vars.BACKEND_URL }}/api/admin/cache
 ```
 
 ### Railway Auto-Deploy for Backend
@@ -223,7 +216,9 @@ OPENAI_MAX_TOKENS=1000
 
 # Security Settings
 JWT_SECRET=${JWT_SECRET}      # Secure random string (min 32 chars)
-CORS_ORIGINS=https://username.github.io
+NEXTAUTH_SECRET=${NEXTAUTH_SECRET}  # NextAuth.js secret
+CORS_ORIGINS=https://food-tracking-frontend.vercel.app,http://localhost:3000
+FRONTEND_URL=https://food-tracking-frontend.vercel.app,http://localhost:3000
 
 # Rate Limiting (production values)
 RATE_LIMIT_MAX=100
@@ -235,26 +230,38 @@ FOOD_SEARCH_LIMIT=10
 ENABLE_ANALYTICS=true
 ```
 
-**GitHub Repository Variables:**
+**Vercel Environment Variables:**
 ```bash
-# Set in GitHub repo Settings > Secrets and variables > Actions
-NEXT_PUBLIC_GRAPHQL_URL=https://your-app.railway.app/graphql
-NEXT_PUBLIC_APP_URL=https://username.github.io/food-tracking
+# Set in Vercel Dashboard > Project Settings > Environment Variables
+
+# Public environment variables (accessible in browser)
+NEXT_PUBLIC_GRAPHQL_URL=https://food-tracking-production.up.railway.app/graphql
+
+# Authentication (NextAuth.js)
+NEXTAUTH_URL=https://food-tracking-frontend.vercel.app
+NEXTAUTH_SECRET=<generate-with-openssl-rand-base64-32>
+
+# Google OAuth credentials
+GOOGLE_CLIENT_ID=<your-google-client-id>
+GOOGLE_CLIENT_SECRET=<your-google-client-secret>
+
+# Apply to: Production, Preview, Development (check all three)
 ```
 
-**GitHub Repository Secrets:**
-```bash
-# Set in GitHub repo Settings > Secrets and variables > Actions
-BACKEND_API_KEY=your-backend-api-key-for-cache-warming
-BACKEND_URL=https://your-app.railway.app
-```
+**Important Vercel Notes:**
+- Environment variables are automatically injected during build and runtime
+- Public variables (`NEXT_PUBLIC_*`) are embedded in the client-side bundle
+- Secret variables are only available server-side
+- Preview deployments can use different environment variables
+- Redeploy required after adding/changing environment variables
 
 ### Secrets Management
 - **Development**: `.env.local` files (gitignored, not committed to version control)
 - **Production Backend**: Railway environment variables dashboard
-- **Production Frontend**: GitHub repository secrets and variables
+- **Production Frontend**: Vercel environment variables (encrypted at rest)
 - **OpenAI API Key**: Stored securely in Railway, monitored for usage limits
-- **Access Control**: Railway team access controls, GitHub repository permissions
+- **OAuth Secrets**: Stored in Vercel environment variables, never exposed to client
+- **Access Control**: Railway and Vercel team access controls, GitHub repository permissions
 
 ### Configuration Validation
 ```typescript
@@ -476,35 +483,52 @@ export class NutritionAnalysisService {
 }
 ```
 
-### Next.js Static Export Configuration
+### Next.js Vercel Configuration
 ```javascript
-// next.config.js for GitHub Pages deployment
+// next.config.js for Vercel deployment
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Required for GitHub Pages static export
-  output: 'export',
-  trailingSlash: true,
+  // Vercel supports full Next.js features (no static export needed)
+  // Server-side rendering, API routes, and middleware all work
+
+  // Image optimization (Vercel supports this)
   images: {
-    unoptimized: true, // GitHub Pages doesn't support Next.js Image Optimization
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com', // Google profile images
+      },
+    ],
   },
 
-  // Environment-specific configuration
-  env: {
-    GRAPHQL_URL: process.env.NEXT_PUBLIC_GRAPHQL_URL,
+  // TypeScript strict mode
+  typescript: {
+    // Fail build on type errors
+    ignoreBuildErrors: false,
   },
 
-  // GitHub Pages specific configuration
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/food-tracking' : '',
-  basePath: process.env.NODE_ENV === 'production' ? '/food-tracking' : '',
+  // ESLint during builds
+  eslint: {
+    // Fail build on lint errors
+    ignoreDuringBuilds: false,
+  },
 
-  // PWA configuration for offline food tracking
+  // Experimental features
   experimental: {
-    webpackBuildWorker: true,
+    typedRoutes: true, // Type-safe navigation
   },
 };
 
 module.exports = nextConfig;
 ```
+
+**Vercel-Specific Features Used:**
+- Server-side rendering for authenticated pages
+- API routes for NextAuth.js (`/api/auth/[...nextauth]`)
+- Middleware for route protection
+- Edge functions for JWT token generation
+- Automatic HTTPS and SSL certificates
+- Global CDN for static assets
 
 ### Docker Compose for Local Development
 ```yaml

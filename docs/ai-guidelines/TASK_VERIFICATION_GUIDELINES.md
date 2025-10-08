@@ -205,11 +205,12 @@ psql $DATABASE_URL -c "EXPLAIN ANALYZE SELECT DISTINCT description FROM foods WH
 - [ ] **No sensitive data**: Only food descriptions and nutrition data stored
 
 #### Infrastructure Security
-- [ ] **HTTPS enforcement**: Railway backend and GitHub Pages use HTTPS
+- [ ] **HTTPS enforcement**: Railway backend and Vercel frontend use HTTPS
 - [ ] **CORS configuration**: Backend allows only frontend domain access
 - [ ] **Rate limiting**: OpenAI API calls rate limited to manage costs
 - [ ] **Error disclosure**: GraphQL errors don't expose database details
 - [ ] **API key security**: OpenAI API key stored securely in Railway environment
+- [ ] **Authentication security**: NextAuth.js JWT tokens properly validated, Google OAuth configured
 
 ## Accessibility Verification
 
@@ -262,9 +263,8 @@ npm run type-check        # Verify TypeScript compilation
 
 # Frontend build verification
 cd frontend
-npm run build             # Next.js production build
-npm run export            # Static export for GitHub Pages
-ls out/                   # Verify static files generated
+npm run build             # Next.js production build (Vercel uses this)
+ls .next/                 # Verify build files generated
 
 # Backend build verification
 cd backend
@@ -280,15 +280,16 @@ npx prisma validate       # Verify schema is valid
 - [ ] **No build errors**: Both Next.js and TypeScript builds succeed
 - [ ] **TypeScript compilation**: No TypeScript errors in strict mode
 - [ ] **Prisma client generation**: Database client generates without errors
-- [ ] **Static export**: Next.js static export works for GitHub Pages
+- [ ] **SSR build**: Next.js builds successfully with SSR and API routes enabled
 - [ ] **Bundle size**: Frontend bundle < 1MB gzipped, code splitting enabled
 - [ ] **Asset optimization**: Images optimized, fonts loaded efficiently
 
 ### Environment Configuration
 - [ ] **Backend environment**: DATABASE_URL, NODE_ENV, PORT, FRONTEND_URL configured
-- [ ] **Frontend environment**: NEXT_PUBLIC_GRAPHQL_ENDPOINT set for production
+- [ ] **Frontend environment**: NEXT_PUBLIC_GRAPHQL_URL, NEXTAUTH_URL, NEXTAUTH_SECRET set for production
 - [ ] **Railway configuration**: Auto-deploy from main branch, PostgreSQL connected
-- [ ] **GitHub Pages**: Static export deployment, custom domain (if used)
+- [ ] **Vercel configuration**: Auto-deploy from main branch, environment variables configured
+- [ ] **Google OAuth**: GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET configured in Vercel
 - [ ] **Database migrations**: Prisma migrations run successfully on Railway
 - [ ] **OpenAI API**: API key configured (when AI features implemented)
 
