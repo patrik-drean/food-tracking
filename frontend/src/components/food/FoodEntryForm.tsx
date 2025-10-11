@@ -224,13 +224,15 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
           />
         </div>
 
-        {/* AI Analysis Button */}
-        <AIAnalysisButton
-          onClick={handleAIAnalysis}
-          isLoading={isAnalyzing}
-          disabled={!canAnalyze}
-          hasAnalyzed={hasAnalyzed}
-        />
+        {/* AI Analysis Button - hide if data is from cached suggestion */}
+        {aiSource !== 'CACHED' && (
+          <AIAnalysisButton
+            onClick={handleAIAnalysis}
+            isLoading={isAnalyzing}
+            disabled={!canAnalyze}
+            hasAnalyzed={hasAnalyzed}
+          />
+        )}
 
         {/* Show loading state while analyzing */}
         {isAnalyzing && <LoadingNutritionState />}
