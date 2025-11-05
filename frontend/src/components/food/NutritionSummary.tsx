@@ -60,40 +60,65 @@ export function NutritionSummary({ nutrition }: NutritionSummaryProps) {
             </svg>
           </button>
         </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <p className="text-sm text-gray-500 mb-1">Calories</p>
-          <p className="text-2xl font-bold text-nutrition-calories">
-            {Math.round(nutrition.calories)}
-          </p>
-          <p className={`text-xs ${caloriesGoalMet ? 'text-green-600' : 'text-gray-400'}`}>
-            / {dailyTargets.calories} goal
-          </p>
+          <div className="flex justify-between items-baseline mb-1">
+            <p className="text-sm text-gray-500">Calories</p>
+            <p className={`text-sm ${caloriesGoalMet ? 'text-green-600' : 'text-gray-400'}`}>
+              {Math.round(nutrition.calories)} / {dailyTargets.calories}
+            </p>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-3">
+            <div
+              className="h-3 rounded-full transition-all duration-300 bg-red-400"
+              style={{ width: `${Math.min((nutrition.calories / dailyTargets.calories) * 100, 100)}%` }}
+            />
+          </div>
         </div>
+
         <div>
-          <p className="text-sm text-gray-500 mb-1">Protein</p>
-          <p className="text-2xl font-bold text-nutrition-protein">
-            {Math.round(nutrition.protein)}g
-          </p>
-          <p className={`text-xs ${proteinGoalMet ? 'text-green-600' : 'text-gray-400'}`}>
-            / {dailyTargets.protein}g goal
-          </p>
+          <div className="flex justify-between items-baseline mb-1">
+            <p className="text-sm text-gray-500">Protein</p>
+            <p className={`text-sm ${proteinGoalMet ? 'text-green-600' : 'text-gray-400'}`}>
+              {Math.round(nutrition.protein)}g / {dailyTargets.protein}g
+            </p>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-3">
+            <div
+              className="h-3 rounded-full transition-all duration-300 bg-blue-400"
+              style={{ width: `${Math.min((nutrition.protein / dailyTargets.protein) * 100, 100)}%` }}
+            />
+          </div>
         </div>
+
         <div>
-          <p className="text-sm text-gray-500 mb-1">Carbs</p>
-          <p className="text-2xl font-bold text-nutrition-carbs">
-            {Math.round(nutrition.carbs)}g
-          </p>
-          <p className="text-xs text-gray-400">/ {dailyTargets.carbs}g goal</p>
+          <div className="flex justify-between items-baseline mb-1">
+            <p className="text-sm text-gray-500">Carbs</p>
+            <p className="text-sm text-gray-400">
+              {Math.round(nutrition.carbs)}g / {dailyTargets.carbs}g
+            </p>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-3">
+            <div
+              className="h-3 rounded-full transition-all duration-300 bg-amber-400"
+              style={{ width: `${Math.min((nutrition.carbs / dailyTargets.carbs) * 100, 100)}%` }}
+            />
+          </div>
         </div>
+
         <div>
-          <p className="text-sm text-gray-500 mb-1">Fat</p>
-          <p className="text-2xl font-bold text-nutrition-fat">
-            {Math.round(nutrition.fat)}g
-          </p>
-          <p className={`text-xs ${fatGoalMet ? 'text-green-600' : 'text-gray-400'}`}>
-            / {dailyTargets.fat}g goal
-          </p>
+          <div className="flex justify-between items-baseline mb-1">
+            <p className="text-sm text-gray-500">Fat</p>
+            <p className={`text-sm ${fatGoalMet ? 'text-green-600' : 'text-gray-400'}`}>
+              {Math.round(nutrition.fat)}g / {dailyTargets.fat}g
+            </p>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-3">
+            <div
+              className="h-3 rounded-full transition-all duration-300 bg-orange-400"
+              style={{ width: `${Math.min((nutrition.fat / dailyTargets.fat) * 100, 100)}%` }}
+            />
+          </div>
         </div>
       </div>
     </Card>
