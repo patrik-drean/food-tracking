@@ -54,11 +54,22 @@ interface DailyFoodLogProps {
  */
 export function DailyFoodLog({ onRefetchReady }: DailyFoodLogProps) {
   const [editingFood, setEditingFood] = useState<Food | null>(null);
+  const [showError, setShowError] = useState(false);
   const [{ data, fetching, error }, reexecuteQuery] = useQuery({
     query: TODAYS_FOODS_QUERY,
     requestPolicy: 'cache-and-network',
   });
   const [, deleteMutation] = useMutation(DELETE_FOOD_MUTATION);
+
+  // Delay showing error to prevent flash during auth checks
+  useEffect(() => {
+    if (error && !fetching && !data) {
+      const timer = setTimeout(() => setShowError(true), 1000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowError(false);
+    }
+  }, [error, fetching, data]);
 
   // Expose refetch function to parent component
   useEffect(() => {
@@ -92,7 +103,7 @@ export function DailyFoodLog({ onRefetchReady }: DailyFoodLogProps) {
     );
   }
 
-  if (error) {
+  if (showError) {
     return (
       <Card>
         <div className="text-center py-12">
