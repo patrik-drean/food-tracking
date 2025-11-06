@@ -69,6 +69,7 @@ export function DailyFoodLog({ onRefetchReady }: DailyFoodLogProps) {
     }
 
     setShowError(false);
+    return undefined;
   }, [error, fetching, data]);
 
   // Expose refetch function to parent component
