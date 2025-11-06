@@ -66,9 +66,9 @@ export function DailyFoodLog({ onRefetchReady }: DailyFoodLogProps) {
     if (error && !fetching && !data) {
       const timer = setTimeout(() => setShowError(true), 1000);
       return () => clearTimeout(timer);
-    } else {
-      setShowError(false);
     }
+
+    setShowError(false);
   }, [error, fetching, data]);
 
   // Expose refetch function to parent component
