@@ -70,7 +70,7 @@ export function NutritionSummary({ nutrition }: NutritionSummaryProps) {
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3">
             <div
-              className="h-3 rounded-full transition-all duration-300 bg-red-400"
+              className="h-3 rounded-full transition-all duration-300 bg-nutrition-calories"
               style={{ width: `${Math.min((nutrition.calories / dailyTargets.calories) * 100, 100)}%` }}
             />
           </div>
@@ -85,7 +85,7 @@ export function NutritionSummary({ nutrition }: NutritionSummaryProps) {
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3">
             <div
-              className="h-3 rounded-full transition-all duration-300 bg-blue-400"
+              className="h-3 rounded-full transition-all duration-300 bg-nutrition-protein"
               style={{ width: `${Math.min((nutrition.protein / dailyTargets.protein) * 100, 100)}%` }}
             />
           </div>
@@ -100,7 +100,7 @@ export function NutritionSummary({ nutrition }: NutritionSummaryProps) {
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3">
             <div
-              className="h-3 rounded-full transition-all duration-300 bg-amber-400"
+              className="h-3 rounded-full transition-all duration-300 bg-nutrition-carbs"
               style={{ width: `${Math.min((nutrition.carbs / dailyTargets.carbs) * 100, 100)}%` }}
             />
           </div>
@@ -115,7 +115,7 @@ export function NutritionSummary({ nutrition }: NutritionSummaryProps) {
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3">
             <div
-              className="h-3 rounded-full transition-all duration-300 bg-orange-400"
+              className="h-3 rounded-full transition-all duration-300 bg-nutrition-fat"
               style={{ width: `${Math.min((nutrition.fat / dailyTargets.fat) * 100, 100)}%` }}
             />
           </div>
