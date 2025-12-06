@@ -13,8 +13,15 @@ interface NumberInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, '
  * Optimized for nutrition value inputs
  */
 export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
-  ({ label, error, helpText, suffix, className, id, ...props }, ref) => {
+  ({ label, error, helpText, suffix, className, id, onFocus, ...props }, ref) => {
     const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
+
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+      // Select all content on focus for easy replacement on mobile
+      e.target.select();
+      // Call the original onFocus handler if provided
+      onFocus?.(e);
+    };
 
     return (
       <div className="w-full">
@@ -47,6 +54,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
             aria-describedby={
               error ? `${inputId}-error` : helpText ? `${inputId}-help` : undefined
             }
+            onFocus={handleFocus}
             {...props}
           />
           {suffix && (
