@@ -54,7 +54,6 @@ interface FoodEntryFormProps {
  * Includes smart typeahead suggestions from food history
  */
 export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
-  const [showNutritionInputs, setShowNutritionInputs] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
   const [aiSource, setAiSource] = useState<'AI_GENERATED' | 'CACHED' | null>(null);
@@ -109,7 +108,6 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
       setValue('nutrition.carbohydrates', food.carbs || 0);
       setValue('nutrition.protein', food.protein || 0);
 
-      setShowNutritionInputs(true);
       setHasAnalyzed(true);
       setAiSource('CACHED'); // Indicate it's from history
     }
@@ -128,7 +126,6 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
     }
 
     setIsAnalyzing(true);
-    setShowNutritionInputs(true);
 
     try {
       const result = await analyzeMutation({
@@ -177,7 +174,6 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
 
       if (result.data?.addFood) {
         reset();
-        setShowNutritionInputs(false);
         setHasAnalyzed(false);
         setAiSource(null);
         onSuccess?.();
@@ -238,8 +234,8 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
         {/* Show loading state while analyzing */}
         {isAnalyzing && <LoadingNutritionState />}
 
-        {/* Show nutrition inputs when analysis is done or user wants manual entry */}
-        {!isAnalyzing && showNutritionInputs && (
+        {/* Show nutrition inputs */}
+        {!isAnalyzing && (
           <div className="space-y-3">
             <NutritionInputs
               register={register}
@@ -251,18 +247,6 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
           </div>
         )}
 
-        {/* Manual entry toggle (only show if not analyzing and inputs not shown) */}
-        {!isAnalyzing && !showNutritionInputs && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowNutritionInputs(true)}
-            className="w-full"
-          >
-            Or enter nutrition manually
-          </Button>
-        )}
 
         {(addFoodResult.error || analyzeResult.error) && (
           <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -289,7 +273,6 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
             variant="outline"
             onClick={() => {
               reset();
-              setShowNutritionInputs(false);
               setHasAnalyzed(false);
               setAiSource(null);
             }}

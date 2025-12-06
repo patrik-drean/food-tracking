@@ -94,11 +94,6 @@ export function NutritionInputs({
           />
         </div>
 
-        {!aiSource && (
-          <p className="text-xs text-gray-500">
-            Leave fields empty to skip nutrition tracking
-          </p>
-        )}
       </div>
     </Card>
   );
