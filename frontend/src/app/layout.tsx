@@ -14,6 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <title>Food Tracker</title>
+      </head>
       <body className={`${inter.className} bg-gray-50 text-gray-900 antialiased`}>
         <SessionProvider>
           <GraphQLProvider>

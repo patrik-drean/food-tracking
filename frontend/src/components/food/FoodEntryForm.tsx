@@ -212,6 +212,7 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
             error={errors.description?.message}
             onFocus={() => setShowSuggestions(true)}
             rightIcon={suggestionsLoading ? <LoadingSpinner size="sm" /> : undefined}
+            autoComplete="off"
           />
 
           {/* Suggestion dropdown */}
