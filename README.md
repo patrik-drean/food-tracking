@@ -120,6 +120,29 @@ npm run build            # Build TypeScript
 npm run start            # Start production server
 npm run db:migrate       # Run Prisma migrations
 npm run db:studio        # Open Prisma Studio
+npm run export:daily     # Export daily nutrition summaries to CSV
+```
+
+#### CSV Export Examples
+```bash
+# Export last 14 days (default)
+npm run export:daily -- --email user@example.com
+
+# Export last 30 days
+npm run export:daily -- --email user@example.com --days 30
+
+# Export specific date range
+npm run export:daily -- --email user@example.com --start 2025-12-01 --end 2025-12-12
+
+# Save to file
+npm run export:daily -- --email user@example.com --days 14 --output report.csv
+```
+
+**Output format:**
+```csv
+Date,Calories,Protein,Carbs,Fat
+2025-12-12,2000,200,300,50
+2025-12-11,1850,180,250,45
 ```
 
 ## 🗃 Database Schema
@@ -265,7 +288,8 @@ cd backend && npm test
 - [ ] AI nutrition analysis with OpenAI
 - [ ] Food photo recognition
 - [ ] Nutrition goals and tracking
-- [ ] Export functionality (CSV/PDF)
+- [x] Export functionality (CSV)
+- [ ] Export functionality (PDF)
 - [ ] Weekly/monthly reports
 
 ## 📚 Learning Resources

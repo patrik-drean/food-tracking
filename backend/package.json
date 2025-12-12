@@ -20,6 +20,7 @@
     "db:reset": "prisma migrate reset --force",
     "migrate:user-data": "tsx src/scripts/migrate-data-to-user.ts",
     "verify:migration": "tsx src/scripts/verify-migration.ts",
+    "export:daily": "tsx src/scripts/export-daily-summary.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
