@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery } from 'urql';
+import { useFrequentFoods } from './useFrequentFoods';
 
 // Inline GraphQL query (using inline to avoid codegen dependency)
 const RECENT_FOODS_QUERY = `
@@ -44,6 +45,11 @@ export function useFoodSuggestions(
 ) {
   const { minLength = 2, debounceMs = 300, maxResults = 10 } = options;
 
+  // Fetch frequent foods only when input is empty
+  const { frequentFoods, isLoading: frequentLoading } = useFrequentFoods({
+    enabled: searchTerm.length === 0,
+  });
+
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const shouldSearch = searchTerm.length >= minLength;
 
@@ -72,7 +78,7 @@ export function useFoodSuggestions(
   });
 
   // Filter and score results by relevance
-  const suggestions = useMemo(() => {
+  const searchSuggestions = useMemo(() => {
     if (!data?.recentFoods || !searchTerm) {
       return [];
     }
@@ -105,10 +111,20 @@ export function useFoodSuggestions(
       .map((item: ScoredFood) => item.food);
   }, [data?.recentFoods, searchTerm, maxResults]);
 
+  // Return frequent foods when input is empty, otherwise return search results
+  if (searchTerm.length === 0) {
+    return {
+      suggestions: frequentFoods,
+      isLoading: frequentLoading,
+      error: null,
+      hasResults: frequentFoods.length > 0,
+    };
+  }
+
   return {
-    suggestions,
+    suggestions: searchSuggestions,
     isLoading: fetching,
     error,
-    hasResults: suggestions.length > 0,
+    hasResults: searchSuggestions.length > 0,
   };
 }

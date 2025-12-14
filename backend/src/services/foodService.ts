@@ -141,4 +141,50 @@ export const foodService = {
       where: { id },
     });
   },
+
+  async getFrequentFoods(context: GraphQLContext, limit: number = 10, days: number = 14) {
+    const userId = requireAuth(context);
+
+    // Calculate cutoff date
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+
+    // Use PostgreSQL ARRAY_AGG to get frequency + most recent nutrition in single query
+    const frequentFoods = await prisma.$queryRaw<Array<{
+      id: string;
+      userId: string | null;
+      description: string;
+      calories: number | null;
+      protein: number | null;
+      carbs: number | null;
+      fat: number | null;
+      isManual: boolean;
+      aiModel: string | null;
+      createdAt: Date;
+      updatedAt: Date;
+      frequency: number;
+    }>>`
+      SELECT
+        f.description,
+        COUNT(*)::int as frequency,
+        (ARRAY_AGG(f.id ORDER BY f."createdAt" DESC))[1] as id,
+        (ARRAY_AGG(f."userId" ORDER BY f."createdAt" DESC))[1] as "userId",
+        (ARRAY_AGG(f.calories ORDER BY f."createdAt" DESC))[1] as calories,
+        (ARRAY_AGG(f.protein ORDER BY f."createdAt" DESC))[1] as protein,
+        (ARRAY_AGG(f.carbs ORDER BY f."createdAt" DESC))[1] as carbs,
+        (ARRAY_AGG(f.fat ORDER BY f."createdAt" DESC))[1] as fat,
+        (ARRAY_AGG(f."isManual" ORDER BY f."createdAt" DESC))[1] as "isManual",
+        (ARRAY_AGG(f."aiModel" ORDER BY f."createdAt" DESC))[1] as "aiModel",
+        MAX(f."createdAt") as "createdAt",
+        MAX(f."updatedAt") as "updatedAt"
+      FROM foods f
+      WHERE f."userId" = ${userId}
+        AND f."createdAt" >= ${cutoffDate}
+      GROUP BY f.description
+      ORDER BY frequency DESC, MAX(f."createdAt") DESC
+      LIMIT ${limit}
+    `;
+
+    return frequentFoods;
+  },
 };

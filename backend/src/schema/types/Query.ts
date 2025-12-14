@@ -29,5 +29,15 @@ builder.queryType({
         return foodService.getFoodsByDate(context, args.date);
       },
     }),
+    frequentFoods: t.field({
+      type: [FoodType],
+      args: {
+        limit: t.arg.int({ required: false, defaultValue: 10 }),
+        days: t.arg.int({ required: false, defaultValue: 14 }),
+      },
+      resolve: async (_parent, args, context) => {
+        return foodService.getFrequentFoods(context, args.limit || 10, args.days || 14);
+      },
+    }),
   }),
 });

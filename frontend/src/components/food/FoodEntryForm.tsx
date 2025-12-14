@@ -217,7 +217,7 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
             isLoading={suggestionsLoading}
             onSelect={handleSelectSuggestion}
             onClose={() => setShowSuggestions(false)}
-            isOpen={showSuggestions && suggestions.length > 0}
+            isOpen={showSuggestions && (suggestions.length > 0 || description === '')}
           />
         </div>
 
