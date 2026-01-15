@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -40,11 +40,18 @@ export function EditMacroTargetsModal({
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<MacroTargetsFormData>({
     resolver: zodResolver(MacroTargetsSchema),
     defaultValues: currentTargets,
   });
+
+  useEffect(() => {
+    if (isOpen) {
+      reset(currentTargets);
+    }
+  }, [isOpen, currentTargets, reset]);
 
   const onSubmit = async (data: MacroTargetsFormData) => {
     setIsSaving(true);

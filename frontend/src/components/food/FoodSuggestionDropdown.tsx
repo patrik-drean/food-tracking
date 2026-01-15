@@ -59,7 +59,7 @@ export function FoodSuggestionDropdown({
   return (
     <div
       ref={dropdownRef}
-      className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto"
+      className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-[480px] overflow-y-auto"
     >
       {isLoading ? (
         <div className="flex items-center justify-center py-4">
