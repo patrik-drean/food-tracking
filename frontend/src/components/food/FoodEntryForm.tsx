@@ -58,7 +58,6 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
   const [aiSource, setAiSource] = useState<'AI_GENERATED' | 'CACHED' | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [allowKeyboard, setAllowKeyboard] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const [addFoodResult, addFoodMutation] = useMutation(ADD_FOOD_MUTATION);
@@ -71,7 +70,7 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
 
   // Handle input focus - on touch devices, first tap shows dropdown without keyboard
   const handleInputFocus = useCallback(() => {
-    if (isTouchDevice() && !allowKeyboard) {
+    if (isTouchDevice() && !showSuggestions) {
       // First tap on touch device: show dropdown but prevent keyboard
       setShowSuggestions(true);
       // Blur immediately to prevent keyboard from showing
@@ -79,24 +78,14 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
         inputRef.current?.blur();
       }, 0);
     } else {
-      // Desktop or second tap on mobile: normal behavior
+      // Desktop or second tap on mobile (dropdown already open): allow keyboard
       setShowSuggestions(true);
     }
-  }, [isTouchDevice, allowKeyboard]);
+  }, [isTouchDevice, showSuggestions]);
 
-  // Handle click on input - enables keyboard on second tap for touch devices
-  const handleInputClick = useCallback(() => {
-    if (isTouchDevice() && showSuggestions && !allowKeyboard) {
-      // Second tap while dropdown is open: allow keyboard
-      setAllowKeyboard(true);
-      inputRef.current?.focus();
-    }
-  }, [isTouchDevice, showSuggestions, allowKeyboard]);
-
-  // Reset keyboard allowance when dropdown closes
+  // Close suggestions dropdown
   const handleCloseSuggestions = useCallback(() => {
     setShowSuggestions(false);
-    setAllowKeyboard(false);
   }, []);
 
   const {
@@ -249,7 +238,6 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
             placeholder="2 slices whole wheat toast"
             error={errors.description?.message}
             onFocus={handleInputFocus}
-            onClick={handleInputClick}
             rightIcon={suggestionsLoading ? <LoadingSpinner size="sm" /> : undefined}
             autoComplete="off"
           />
