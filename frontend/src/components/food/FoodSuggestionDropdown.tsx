@@ -21,6 +21,8 @@ interface FoodSuggestionDropdownProps {
   onSelect: (selectedFood: Food) => void;
   onClose: () => void;
   isOpen: boolean;
+  /** Ref to input element - clicks on this won't trigger close */
+  inputRef?: React.RefObject<HTMLInputElement | null>;
 }
 
 /**
@@ -33,13 +35,18 @@ export function FoodSuggestionDropdown({
   onSelect,
   onClose,
   isOpen,
+  inputRef,
 }: FoodSuggestionDropdownProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
+  // Close dropdown when clicking outside (but not on the input)
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const isClickOnDropdown = dropdownRef.current?.contains(target);
+      const isClickOnInput = inputRef?.current?.contains(target);
+
+      if (!isClickOnDropdown && !isClickOnInput) {
         onClose();
       }
     }
@@ -50,7 +57,7 @@ export function FoodSuggestionDropdown({
     }
 
     return undefined;
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, inputRef]);
 
   if (!isOpen) {
     return null;

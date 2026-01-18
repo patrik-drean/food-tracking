@@ -249,6 +249,7 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
             onSelect={handleSelectSuggestion}
             onClose={handleCloseSuggestions}
             isOpen={showSuggestions && (suggestions.length > 0 || description === '')}
+            inputRef={inputRef}
           />
         </div>
 
