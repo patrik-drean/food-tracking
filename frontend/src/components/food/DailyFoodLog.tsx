@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation } from 'urql';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -72,14 +72,16 @@ export function DailyFoodLog({ onRefetchReady }: DailyFoodLogProps) {
     return undefined;
   }, [error, fetching, data]);
 
-  // Expose refetch function to parent component
+  // Store onRefetchReady in a ref to avoid infinite loops
+  const onRefetchReadyRef = useRef(onRefetchReady);
+  onRefetchReadyRef.current = onRefetchReady;
+
+  // Expose refetch function to parent component - only run once on mount
   useEffect(() => {
-    if (onRefetchReady) {
-      onRefetchReady(() => {
-        reexecuteQuery({ requestPolicy: 'network-only' });
-      });
-    }
-  }, [onRefetchReady, reexecuteQuery]);
+    onRefetchReadyRef.current?.(() => {
+      reexecuteQuery({ requestPolicy: 'network-only' });
+    });
+  }, [reexecuteQuery]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this food entry?')) return;
