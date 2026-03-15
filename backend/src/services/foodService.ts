@@ -1,5 +1,5 @@
 import { prisma } from '../lib/prisma';
-import { getTodayRangeMT, getStartOfDayMT, getEndOfDayMT } from '../lib/timezone';
+import { getTodayRangeMT, getStartOfDayMT, getEndOfDayMT, TIMEZONE } from '../lib/timezone';
 import { requireAuth } from '../lib/auth';
 import type { GraphQLContext } from '../schema/context';
 
@@ -139,6 +139,78 @@ export const foodService = {
 
     return prisma.food.delete({
       where: { id },
+    });
+  },
+
+  async getWeeklySummary(context: GraphQLContext) {
+    const userId = requireAuth(context);
+
+    // Build 7 date strings: yesterday back 7 days, in Mountain Time
+    const now = new Date();
+    const dates: string[] = [];
+    for (let i = 1; i <= 7; i++) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const mtDateString = d.toLocaleString('en-US', {
+        timeZone: TIMEZONE,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      });
+      const [month, day, year] = mtDateString.split('/');
+      dates.push(`${year}-${month}-${day}`);
+    }
+
+    // Single query for the full 7-day range
+    const rangeStart = getStartOfDayMT(dates[dates.length - 1]); // oldest
+    const rangeEnd = getEndOfDayMT(dates[0]); // most recent (yesterday)
+
+    const foods = await prisma.food.findMany({
+      where: {
+        userId,
+        createdAt: {
+          gte: rangeStart,
+          lt: rangeEnd,
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    // Pre-populate all 7 days with zeros
+    const summaryMap = new Map<string, { calories: number; protein: number; carbs: number; fat: number }>();
+    for (const dateStr of dates) {
+      summaryMap.set(dateStr, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+    }
+
+    // Group foods by their Mountain Time day and sum
+    for (const food of foods) {
+      const foodDateMT = food.createdAt.toLocaleString('en-US', {
+        timeZone: TIMEZONE,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      });
+      const [m, d, y] = foodDateMT.split('/');
+      const key = `${y}-${m}-${d}`;
+      const bucket = summaryMap.get(key);
+      if (bucket) {
+        bucket.calories += food.calories || 0;
+        bucket.protein += food.protein || 0;
+        bucket.carbs += food.carbs || 0;
+        bucket.fat += food.fat || 0;
+      }
+    }
+
+    // Return most-recent-first
+    return dates.map((dateStr) => {
+      const totals = summaryMap.get(dateStr)!;
+      return {
+        date: dateStr,
+        calories: Math.round(totals.calories * 10) / 10,
+        protein: Math.round(totals.protein * 10) / 10,
+        carbs: Math.round(totals.carbs * 10) / 10,
+        fat: Math.round(totals.fat * 10) / 10,
+      };
     });
   },
 

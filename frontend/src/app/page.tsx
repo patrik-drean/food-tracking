@@ -4,6 +4,7 @@ import { useRef, useCallback } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { FoodEntryForm } from '@/components/food/FoodEntryForm';
 import { DailyFoodLog } from '@/components/food/DailyFoodLog';
+import { WeeklyNutritionSummary } from '@/components/food/WeeklyNutritionSummary';
 
 export default function HomePage() {
   const refetchFoodLogRef = useRef<(() => void) | null>(null);
@@ -21,6 +22,7 @@ export default function HomePage() {
       <div className="space-y-6">
         <FoodEntryForm onSuccess={handleFoodAdded} />
         <DailyFoodLog onRefetchReady={handleRefetchReady} />
+        <WeeklyNutritionSummary />
       </div>
     </AppLayout>
   );
