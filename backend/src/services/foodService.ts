@@ -162,8 +162,10 @@ export const foodService = {
     }
 
     // Single query for the full 7-day range
-    const rangeStart = getStartOfDayMT(dates[dates.length - 1]); // oldest
-    const rangeEnd = getEndOfDayMT(dates[0]); // most recent (yesterday)
+    // Append T12:00:00 so the date parses as noon UTC, not midnight UTC.
+    // Midnight UTC falls on the previous day in Mountain Time, shifting the range.
+    const rangeStart = getStartOfDayMT(`${dates[dates.length - 1]}T12:00:00`); // oldest
+    const rangeEnd = getEndOfDayMT(`${dates[0]}T12:00:00`); // most recent (yesterday)
 
     const foods = await prisma.food.findMany({
       where: {
