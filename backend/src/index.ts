@@ -5,7 +5,7 @@ import { createContext } from './schema/context'
 import { prisma } from './lib/prisma'
 import dotenv from 'dotenv'
 
-// Load environment variables
+// Load environment variables from .env file
 dotenv.config()
 
 // Create GraphQL Yoga server
