@@ -63,25 +63,9 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
   const [addFoodResult, addFoodMutation] = useMutation(ADD_FOOD_MUTATION);
   const [analyzeResult, analyzeMutation] = useMutation(ANALYZE_FOOD_NUTRITION_MUTATION);
 
-  // Check if we're on a touch device
-  const isTouchDevice = useCallback(() => {
-    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-  }, []);
-
-  // Handle input focus - on touch devices, first tap shows dropdown without keyboard
   const handleInputFocus = useCallback(() => {
-    if (isTouchDevice() && !showSuggestions) {
-      // First tap on touch device: show dropdown but prevent keyboard
-      setShowSuggestions(true);
-      // Blur immediately to prevent keyboard from showing
-      setTimeout(() => {
-        inputRef.current?.blur();
-      }, 0);
-    } else {
-      // Desktop or second tap on mobile (dropdown already open): allow keyboard
-      setShowSuggestions(true);
-    }
-  }, [isTouchDevice, showSuggestions]);
+    setShowSuggestions(true);
+  }, []);
 
   // Close suggestions dropdown
   const handleCloseSuggestions = useCallback(() => {

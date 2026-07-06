@@ -18,6 +18,7 @@ interface AddFoodInput {
 interface UpdateFoodNutritionInput {
   id: string | number;
   nutrition: NutritionInput;
+  date?: string | null;
 }
 
 export const foodService = {
@@ -81,7 +82,7 @@ export const foodService = {
 
   async updateFoodNutrition(context: GraphQLContext, input: UpdateFoodNutritionInput) {
     const userId = requireAuth(context);
-    const { id, nutrition } = input;
+    const { id, nutrition, date } = input;
 
     // Verify ownership
     const food = await prisma.food.findUnique({
@@ -101,6 +102,7 @@ export const foodService = {
         carbs: nutrition.carbs,
         protein: nutrition.protein,
         isManual: true,
+        ...(date ? { createdAt: getStartOfDayMT(date) } : {}),
       },
     });
   },

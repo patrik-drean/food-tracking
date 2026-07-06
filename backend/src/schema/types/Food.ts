@@ -44,6 +44,7 @@ const UpdateFoodNutritionInput = builder.inputType('UpdateFoodNutritionInput', {
   fields: (t) => ({
     id: t.id({ required: true }),
     nutrition: t.field({ type: NutritionInput, required: true }),
+    date: t.string({ required: false }),
   }),
 });
 
