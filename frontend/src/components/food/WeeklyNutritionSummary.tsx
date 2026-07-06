@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery } from 'urql';
 import { Card } from '@/components/ui/Card';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { DayFoodLogModal } from './DayFoodLogModal';
 
 const WEEKLY_SUMMARY_QUERY = `
   query WeeklySummary {
@@ -53,6 +54,7 @@ function computeAverages(summaries: DailySummary[]) {
 
 export function WeeklyNutritionSummary() {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [{ data, fetching, error }] = useQuery({
     query: WEEKLY_SUMMARY_QUERY,
     requestPolicy: 'cache-and-network',
@@ -63,6 +65,7 @@ export function WeeklyNutritionSummary() {
   const avg = summaries.length > 0 ? computeAverages(summaries) : null;
 
   return (
+    <>
     <Card padding="none">
       {/* Collapsible header */}
       <button
@@ -119,17 +122,36 @@ export function WeeklyNutritionSummary() {
                     </tr>
                   </thead>
                   <tbody>
-                    {summaries.map((day) => (
-                      <tr key={day.date} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="py-2 pr-4 text-gray-700">{formatDate(day.date)}</td>
-                        <td className="py-2 px-2 text-right text-gray-900">
-                          {Math.round(day.calories).toLocaleString()}
-                        </td>
-                        <td className="py-2 px-2 text-right text-gray-900">{Math.round(day.protein)}g</td>
-                        <td className="py-2 px-2 text-right text-gray-900">{Math.round(day.carbs)}g</td>
-                        <td className="py-2 px-2 text-right text-gray-900">{Math.round(day.fat)}g</td>
-                      </tr>
-                    ))}
+                    {summaries.map((day) => {
+                      const isEmpty = day.calories === 0 && day.protein === 0 && day.carbs === 0 && day.fat === 0;
+                      return (
+                        <tr
+                          key={day.date}
+                          className="border-b border-gray-100 hover:bg-blue-50 cursor-pointer transition-colors"
+                          onClick={() => setSelectedDate(day.date)}
+                          title="Click to view food log"
+                        >
+                          <td className="py-2 pr-4 text-gray-700 font-medium">{formatDate(day.date)}</td>
+                          {isEmpty ? (
+                            <>
+                              <td className="py-2 px-2 text-right text-gray-400">—</td>
+                              <td className="py-2 px-2 text-right text-gray-400">—</td>
+                              <td className="py-2 px-2 text-right text-gray-400">—</td>
+                              <td className="py-2 px-2 text-right text-gray-400">—</td>
+                            </>
+                          ) : (
+                            <>
+                              <td className="py-2 px-2 text-right text-gray-900">
+                                {Math.round(day.calories).toLocaleString()}
+                              </td>
+                              <td className="py-2 px-2 text-right text-gray-900">{Math.round(day.protein)}g</td>
+                              <td className="py-2 px-2 text-right text-gray-900">{Math.round(day.carbs)}g</td>
+                              <td className="py-2 px-2 text-right text-gray-900">{Math.round(day.fat)}g</td>
+                            </>
+                          )}
+                        </tr>
+                      );
+                    })}
                   </tbody>
                   {avg && (
                     <tfoot>
@@ -149,19 +171,30 @@ export function WeeklyNutritionSummary() {
 
               {/* Mobile stacked layout */}
               <div className="md:hidden space-y-2">
-                {summaries.map((day) => (
-                  <div key={day.date} className="bg-gray-50 rounded-lg px-4 py-3">
-                    <p className="text-sm font-medium text-gray-900 mb-1">{formatDate(day.date)}</p>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs">
-                      <span className="text-nutrition-calories">
-                        {Math.round(day.calories).toLocaleString()} cal
-                      </span>
-                      <span className="text-nutrition-protein">{Math.round(day.protein)}g protein</span>
-                      <span className="text-nutrition-carbs">{Math.round(day.carbs)}g carbs</span>
-                      <span className="text-nutrition-fat">{Math.round(day.fat)}g fat</span>
-                    </div>
-                  </div>
-                ))}
+                {summaries.map((day) => {
+                  const isEmpty = day.calories === 0 && day.protein === 0 && day.carbs === 0 && day.fat === 0;
+                  return (
+                    <button
+                      key={day.date}
+                      className="w-full text-left bg-gray-50 rounded-lg px-4 py-3 hover:bg-blue-50 transition-colors"
+                      onClick={() => setSelectedDate(day.date)}
+                    >
+                      <p className="text-sm font-medium text-gray-900 mb-1">{formatDate(day.date)}</p>
+                      {isEmpty ? (
+                        <span className="text-xs text-gray-400">No data</span>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs">
+                          <span className="text-nutrition-calories">
+                            {Math.round(day.calories).toLocaleString()} cal
+                          </span>
+                          <span className="text-nutrition-protein">{Math.round(day.protein)}g protein</span>
+                          <span className="text-nutrition-carbs">{Math.round(day.carbs)}g carbs</span>
+                          <span className="text-nutrition-fat">{Math.round(day.fat)}g fat</span>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
                 {avg && (
                   <div className="bg-gray-100 rounded-lg px-4 py-3 border-t-2 border-gray-300">
                     <p className="text-sm font-semibold text-gray-900 mb-1">7-Day Avg</p>
@@ -179,5 +212,14 @@ export function WeeklyNutritionSummary() {
         </div>
       )}
     </Card>
+
+      {selectedDate && (
+        <DayFoodLogModal
+          date={selectedDate}
+          isOpen={true}
+          onClose={() => setSelectedDate(null)}
+        />
+      )}
+    </>
   );
 }

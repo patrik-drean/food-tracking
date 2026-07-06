@@ -61,8 +61,8 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const [addFoodResult, addFoodMutation] = useMutation(ADD_FOOD_MUTATION);
-  const [analyzeResult, analyzeMutation] = useMutation(ANALYZE_FOOD_NUTRITION_MUTATION);
+  const [, addFoodMutation] = useMutation(ADD_FOOD_MUTATION);
+  const [, analyzeMutation] = useMutation(ANALYZE_FOOD_NUTRITION_MUTATION);
 
   const handleInputFocus = useCallback(() => {
     setShowSuggestions(true);

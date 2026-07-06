@@ -37,7 +37,7 @@ module.exports = {
         nutrition: {
           calories: '#f59e0b',
           protein: '#ef4444',
-          carbs: '#3b82f6',
+          carbs: '#06b6d4',
           fat: '#8b5cf6',
         }
       },

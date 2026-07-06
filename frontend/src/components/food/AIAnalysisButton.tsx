@@ -17,22 +17,23 @@ export function AIAnalysisButton({
   hasAnalyzed,
 }: AIAnalysisButtonProps) {
   return (
-    <Button
-      type="button"
-      variant="outline"
-      size="md"
-      onClick={onClick}
-      disabled={disabled || isLoading}
-      className="w-full"
-    >
-      <SparklesIcon className="w-4 h-4 mr-2" />
-      {isLoading ? (
-        <span>Analyzing nutrition...</span>
-      ) : hasAnalyzed ? (
-        <span>Re-analyze with AI</span>
-      ) : (
-        <span>Get AI Nutrition Estimate</span>
-      )}
-    </Button>
+    <div className="flex justify-end">
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={onClick}
+        disabled={disabled || isLoading}
+      >
+        <SparklesIcon className="w-4 h-4 mr-2" />
+        {isLoading ? (
+          <span>Analyzing...</span>
+        ) : hasAnalyzed ? (
+          <span>Re-analyze with AI</span>
+        ) : (
+          <span>Get AI Nutrition Estimate</span>
+        )}
+      </Button>
+    </div>
   );
 }

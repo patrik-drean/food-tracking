@@ -64,7 +64,7 @@ function todayDateString(): string {
 }
 
 export function EditFoodModal({ food, isOpen, onClose, onSuccess }: EditFoodModalProps) {
-  const [updateResult, updateMutation] = useMutation(UPDATE_FOOD_MUTATION);
+  const [, updateMutation] = useMutation(UPDATE_FOOD_MUTATION);
 
   const {
     register,

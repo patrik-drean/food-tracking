@@ -36,7 +36,7 @@ export function NutritionInputs({
     Object.values(nutritionData).some(v => v !== undefined && v !== null && !isNaN(v as number));
 
   return (
-    <Card padding="sm" className="bg-gray-50 border-dashed border-2 animate-in slide-in-from-top-2 duration-300">
+    <Card padding="sm" className="bg-gray-50 border border-gray-200 animate-in slide-in-from-top-2 duration-300">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
