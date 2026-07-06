@@ -4,15 +4,16 @@ import { startOfDay, addDays, format } from 'date-fns';
 const TIMEZONE = 'America/Denver';
 
 export function getStartOfDayMT(date?: string | Date): Date {
-  let localDate: Date;
   if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    // Parse date-only string as a local wall-clock date in MT, not UTC
+    // For YYYY-MM-DD strings, interpret the date as a Mountain Time wall-clock date.
+    // zonedTimeToUtc reads the local fields of the Date object and treats them as the
+    // given timezone, so we construct a naive midnight date directly.
     const parts = date.split('-').map(Number);
-    localDate = new Date(parts[0]!, parts[1]! - 1, parts[2]);
-  } else {
-    localDate = date ? new Date(date) : new Date();
+    const naiveMidnight = new Date(parts[0]!, parts[1]! - 1, parts[2]!);
+    return zonedTimeToUtc(naiveMidnight, TIMEZONE);
   }
-  const zonedDate = utcToZonedTime(localDate, TIMEZONE);
+  const utcDate = date ? new Date(date) : new Date();
+  const zonedDate = utcToZonedTime(utcDate, TIMEZONE);
   return zonedTimeToUtc(startOfDay(zonedDate), TIMEZONE);
 }
 
