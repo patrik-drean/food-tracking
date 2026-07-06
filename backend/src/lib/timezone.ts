@@ -13,18 +13,22 @@ const TIMEZONE = 'America/Denver'; // Mountain Time (handles both MDT and MST au
  * @returns Date object representing start of day in Mountain Time (converted to UTC)
  */
 export function getStartOfDayMT(date?: string | Date): Date {
-  const targetDate = date ? new Date(date) : new Date();
+  let year: string, month: string, day: string;
 
-  // Format the date in Mountain Time to get year, month, day
-  const mtDateString = targetDate.toLocaleString('en-US', {
-    timeZone: TIMEZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
-
-  // Parse MM/DD/YYYY format
-  const [month, day, year] = mtDateString.split('/');
+  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    // Date-only strings (YYYY-MM-DD) must not go through new Date() — JS parses
+    // them as UTC midnight, which falls on the previous MT day during summer.
+    [year, month, day] = date.split('-');
+  } else {
+    const targetDate = date ? new Date(date) : new Date();
+    const mtDateString = targetDate.toLocaleString('en-US', {
+      timeZone: TIMEZONE,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+    [month, day, year] = mtDateString.split('/');
+  }
 
   // Try both possible offsets (MST = -07:00, MDT = -06:00)
   // The correct one will produce midnight when formatted back to MT
