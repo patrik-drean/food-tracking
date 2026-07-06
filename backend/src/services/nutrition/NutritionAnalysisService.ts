@@ -1,6 +1,8 @@
+import { createHash } from 'crypto';
 import { openai, OPENAI_MODEL, OPENAI_MAX_TOKENS, OPENAI_TEMPERATURE } from '@/lib/openai';
 import { NutritionCache } from './NutritionCache';
 import { validateFoodDescription } from '@/utils/validation';
+import { prisma } from '@/lib/prisma';
 
 interface NutritionData {
   calories: number;
@@ -21,51 +23,88 @@ export class NutritionAnalysisService {
     this.cache = new NutritionCache();
   }
 
-  /**
-   * Analyze food description and return nutrition estimates
-   * Uses caching to reduce API costs
-   */
   async analyzeFoodNutrition(description: string): Promise<NutritionAnalysis> {
-    // Validate input
     validateFoodDescription(description);
 
-    // Normalize description for cache key
     const cacheKey = this.normalizeDescription(description);
+    const descriptionHash = this.hashDescription(cacheKey);
 
-    // Check cache first
-    const cached = this.cache.get(cacheKey);
-    if (cached) {
-      return {
-        ...cached,
-        source: 'CACHED',
-        confidence: 'high',
-      };
+    // L1: in-memory cache
+    const memCached = this.cache.get(cacheKey);
+    if (memCached) {
+      return { ...memCached, source: 'CACHED', confidence: 'high' };
     }
 
-    // Call OpenAI API
+    // L2: database cache
+    const dbCached = await this.getFromDb(descriptionHash, description);
+    if (dbCached) {
+      this.cache.set(cacheKey, dbCached);
+      return { ...dbCached, source: 'CACHED', confidence: 'high' };
+    }
+
+    // Cache miss — call OpenAI
     try {
       const nutrition = await this.callOpenAI(description);
-
-      // Validate AI response
       this.validateNutritionData(nutrition);
 
-      // Cache the result
       this.cache.set(cacheKey, nutrition);
+      await this.saveToDb(descriptionHash, description, nutrition);
 
-      return {
-        ...nutrition,
-        source: 'AI_GENERATED',
-        confidence: 'medium',
-      };
+      return { ...nutrition, source: 'AI_GENERATED', confidence: 'medium' };
     } catch (error) {
       console.error('OpenAI API error:', error);
       throw new Error(`Failed to analyze nutrition for "${description}". Please try manual entry.`);
     }
   }
 
-  /**
-   * Call OpenAI API with structured prompt
-   */
+  private async getFromDb(descriptionHash: string, description: string): Promise<NutritionData | null> {
+    try {
+      const entry = await prisma.foodCache.findUnique({
+        where: { userId_descriptionHash: { userId: null as unknown as string, descriptionHash } },
+      });
+      if (!entry) return null;
+
+      // Update usage stats in background (don't await)
+      prisma.foodCache.update({
+        where: { id: entry.id },
+        data: { lastUsed: new Date(), useCount: { increment: 1 } },
+      }).catch(() => {});
+
+      const data = entry.nutritionData as unknown as NutritionData;
+      if (typeof data.calories !== 'number') return null;
+      return data;
+    } catch {
+      return null;
+    }
+  }
+
+  private async saveToDb(descriptionHash: string, originalDesc: string, nutrition: NutritionData): Promise<void> {
+    try {
+      await prisma.foodCache.upsert({
+        where: { userId_descriptionHash: { userId: null as unknown as string, descriptionHash } },
+        create: {
+          userId: null,
+          descriptionHash,
+          originalDesc,
+          nutritionData: nutrition as object,
+          aiModel: OPENAI_MODEL,
+        },
+        update: {
+          nutritionData: nutrition as object,
+          lastUsed: new Date(),
+          useCount: { increment: 1 },
+        },
+      });
+    } catch (error) {
+      // Non-fatal: in-memory cache already has the result
+      console.error('Failed to persist nutrition cache to DB:', error);
+    }
+  }
+
+  private hashDescription(normalizedDescription: string): string {
+    return createHash('sha256').update(normalizedDescription).digest('hex');
+  }
+
   private async callOpenAI(description: string): Promise<NutritionData> {
     const prompt = this.buildPrompt(description);
 
@@ -91,23 +130,16 @@ export class NutritionAnalysisService {
       throw new Error('No response from OpenAI API');
     }
 
-    // Parse JSON response
     try {
       const parsed = JSON.parse(content);
 
-      // Extract and validate each field exists
       const calories = parsed.calories ?? parsed.Calories;
       const fat = parsed.fat ?? parsed.Fat;
       const carbs = parsed.carbs ?? parsed.carbohydrates ?? parsed.Carbs ?? parsed.Carbohydrates;
       const protein = parsed.protein ?? parsed.Protein;
 
-      // Log if any fields are missing for debugging
       if (calories === undefined || fat === undefined || carbs === undefined || protein === undefined) {
-        console.error('OpenAI response missing fields:', {
-          rawResponse: content,
-          parsed,
-          extracted: { calories, fat, carbs, protein }
-        });
+        console.error('OpenAI response missing fields:', { rawResponse: content, parsed, extracted: { calories, fat, carbs, protein } });
       }
 
       return {
@@ -116,15 +148,12 @@ export class NutritionAnalysisService {
         carbs: Number(carbs) || 0,
         protein: Number(protein) || 0,
       };
-    } catch (parseError) {
+    } catch {
       console.error('Failed to parse OpenAI response:', content);
       throw new Error('Invalid response format from OpenAI API');
     }
   }
 
-  /**
-   * Build structured prompt for OpenAI
-   */
   private buildPrompt(description: string): string {
     return `Analyze the nutritional content of this food item: "${description}"
 
@@ -142,60 +171,28 @@ Provide nutrition estimates in this exact JSON format:
 Return ONLY valid JSON with these four numeric fields. Do not include explanations.`;
   }
 
-  /**
-   * Normalize description for consistent caching
-   */
   private normalizeDescription(description: string): string {
     return description.toLowerCase().trim().replace(/\s+/g, ' ');
   }
 
-  /**
-   * Validate nutrition data is within reasonable ranges
-   */
   private validateNutritionData(data: NutritionData): void {
-    // Check for NaN or non-finite values
-    if (!Number.isFinite(data.calories)) {
-      throw new Error('Invalid calories value: must be a number');
-    }
-    if (!Number.isFinite(data.fat)) {
-      throw new Error('Invalid fat value: must be a number');
-    }
-    if (!Number.isFinite(data.carbs)) {
-      throw new Error('Invalid carbs value: must be a number');
-    }
-    if (!Number.isFinite(data.protein)) {
-      throw new Error('Invalid protein value: must be a number');
-    }
-
-    // Check reasonable ranges
-    if (data.calories < 0 || data.calories > 10000) {
-      throw new Error('Invalid calories value: must be between 0 and 10000');
-    }
-    if (data.fat < 0 || data.fat > 1000) {
-      throw new Error('Invalid fat value: must be between 0 and 1000');
-    }
-    if (data.carbs < 0 || data.carbs > 1000) {
-      throw new Error('Invalid carbs value: must be between 0 and 1000');
-    }
-    if (data.protein < 0 || data.protein > 1000) {
-      throw new Error('Invalid protein value: must be between 0 and 1000');
-    }
+    if (!Number.isFinite(data.calories)) throw new Error('Invalid calories value: must be a number');
+    if (!Number.isFinite(data.fat)) throw new Error('Invalid fat value: must be a number');
+    if (!Number.isFinite(data.carbs)) throw new Error('Invalid carbs value: must be a number');
+    if (!Number.isFinite(data.protein)) throw new Error('Invalid protein value: must be a number');
+    if (data.calories < 0 || data.calories > 10000) throw new Error('Invalid calories value: must be between 0 and 10000');
+    if (data.fat < 0 || data.fat > 1000) throw new Error('Invalid fat value: must be between 0 and 1000');
+    if (data.carbs < 0 || data.carbs > 1000) throw new Error('Invalid carbs value: must be between 0 and 1000');
+    if (data.protein < 0 || data.protein > 1000) throw new Error('Invalid protein value: must be between 0 and 1000');
   }
 
-  /**
-   * Clear cache (useful for testing)
-   */
   clearCache(): void {
     this.cache.clear();
   }
 
-  /**
-   * Get cache statistics
-   */
   getCacheStats() {
     return this.cache.getStats();
   }
 }
 
-// Export singleton instance
 export const nutritionAnalysisService = new NutritionAnalysisService();

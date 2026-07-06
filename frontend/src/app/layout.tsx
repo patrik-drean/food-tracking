@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { GraphQLProvider } from '../lib/graphql-client'
 import { SessionProvider } from 'next-auth/react'
+import { Toaster } from 'react-hot-toast'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -27,6 +28,7 @@ export default function RootLayout({
         <SessionProvider>
           <GraphQLProvider>
             {children}
+            <Toaster position="bottom-right" toastOptions={{ duration: 3000 }} />
           </GraphQLProvider>
         </SessionProvider>
       </body>

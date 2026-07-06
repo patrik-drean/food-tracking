@@ -14,6 +14,7 @@ import { FoodSuggestionDropdown } from './FoodSuggestionDropdown';
 import { useFoodSuggestions } from './hooks/useFoodSuggestions';
 import { FoodEntrySchema, type FoodEntryFormData } from './FoodFormSchema';
 import { useMutation } from 'urql';
+import toast from 'react-hot-toast';
 
 // GraphQL mutation for adding food
 const ADD_FOOD_MUTATION = `
@@ -154,11 +155,8 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
         setHasAnalyzed(true);
         setAiSource(nutrition.source as 'AI_GENERATED' | 'CACHED');
       }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('AI analysis failed:', error);
-      // Show error notification to user
-      alert('Failed to analyze nutrition. Please enter values manually or try again.');
+    } catch {
+      toast.error('Failed to analyze nutrition. Please enter values manually or try again.');
     } finally {
       setIsAnalyzing(false);
     }
@@ -182,15 +180,17 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
         },
       });
 
-      if (result.data?.addFood) {
+      if (result.error) {
+        toast.error('Failed to save food entry. Please try again.');
+      } else if (result.data?.addFood) {
         reset();
         setHasAnalyzed(false);
         setAiSource(null);
+        toast.success('Food entry added.');
         onSuccess?.();
       }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to add food:', error);
+    } catch {
+      toast.error('Failed to save food entry. Please try again.');
     }
   };
 
@@ -263,16 +263,6 @@ export function FoodEntryForm({ onSuccess }: FoodEntryFormProps) {
           </div>
         )}
 
-
-        {(addFoodResult.error || analyzeResult.error) && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-600">
-              {addFoodResult.error
-                ? 'Failed to save food entry. Please try again.'
-                : 'Failed to analyze nutrition. Please enter values manually.'}
-            </p>
-          </div>
-        )}
 
         <div className="flex gap-3 pt-2">
           <Button

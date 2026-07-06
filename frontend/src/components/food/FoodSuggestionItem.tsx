@@ -37,13 +37,13 @@ export function FoodSuggestionItem({ food, onClick }: FoodSuggestionItemProps) {
                 <span>{Math.round(food.calories)} cal</span>
               )}
               {food.protein && (
-                <span className="text-food-protein">{food.protein}g P</span>
+                <span className="text-nutrition-protein">{food.protein}g P</span>
               )}
               {food.carbs && (
-                <span className="text-food-carbs">{food.carbs}g C</span>
+                <span className="text-nutrition-carbs">{food.carbs}g C</span>
               )}
               {food.fat && (
-                <span className="text-food-fat">{food.fat}g F</span>
+                <span className="text-nutrition-fat">{food.fat}g F</span>
               )}
             </div>
           ) : (

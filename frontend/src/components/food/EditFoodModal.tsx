@@ -7,6 +7,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { NumberInput } from '@/components/ui/NumberInput';
 import { useMutation } from 'urql';
+import toast from 'react-hot-toast';
 
 const UPDATE_FOOD_MUTATION = `
   mutation UpdateFoodNutrition($input: UpdateFoodNutritionInput!) {
@@ -98,12 +99,13 @@ export function EditFoodModal({ food, isOpen, onClose, onSuccess }: EditFoodModa
         },
       });
 
-      if (result.data?.updateFoodNutrition) {
+      if (result.error) {
+        toast.error('Failed to update food entry. Please try again.');
+      } else if (result.data?.updateFoodNutrition) {
         onSuccess();
       }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to update food:', error);
+    } catch {
+      toast.error('Failed to update food entry. Please try again.');
     }
   };
 
@@ -162,14 +164,6 @@ export function EditFoodModal({ food, isOpen, onClose, onSuccess }: EditFoodModa
             suffix="g"
           />
         </div>
-
-        {updateResult.error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-600">
-              Failed to update nutrition data. Please try again.
-            </p>
-          </div>
-        )}
 
         <div className="flex gap-3 pt-4">
           <Button

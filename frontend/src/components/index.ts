@@ -9,7 +9,6 @@ export { Input } from './ui/Input';
 export { NumberInput } from './ui/NumberInput';
 export { Card } from './ui/Card';
 export { LoadingSpinner } from './ui/LoadingSpinner';
-export { ErrorMessage } from './ui/ErrorMessage';
 export { Badge } from './ui/Badge';
 export { Modal } from './ui/Modal';
 
@@ -17,6 +16,3 @@ export { Modal } from './ui/Modal';
 export { FoodEntryForm } from './food/FoodEntryForm';
 export { NutritionInputs } from './food/NutritionInputs';
 
-// Other Components
-export { GraphQLErrorBoundary } from './ErrorBoundary';
-export { GraphQLTest } from './GraphQLTest';

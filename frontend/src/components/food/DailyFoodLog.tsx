@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation } from 'urql';
+import toast from 'react-hot-toast';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -87,11 +88,15 @@ export function DailyFoodLog({ onRefetchReady }: DailyFoodLogProps) {
     if (!confirm('Are you sure you want to delete this food entry?')) return;
 
     try {
-      await deleteMutation({ id });
-      reexecuteQuery({ requestPolicy: 'network-only' });
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to delete food:', error);
+      const result = await deleteMutation({ id });
+      if (result.error) {
+        toast.error('Failed to delete food entry.');
+      } else {
+        toast.success('Food entry deleted.');
+        reexecuteQuery({ requestPolicy: 'network-only' });
+      }
+    } catch {
+      toast.error('Failed to delete food entry.');
     }
   };
 
@@ -158,6 +163,7 @@ export function DailyFoodLog({ onRefetchReady }: DailyFoodLogProps) {
           onClose={() => setEditingFood(null)}
           onSuccess={() => {
             setEditingFood(null);
+            toast.success('Food entry updated.');
             reexecuteQuery({ requestPolicy: 'network-only' });
           }}
         />

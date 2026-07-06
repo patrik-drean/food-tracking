@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { Card } from '@/components/ui/Card';
 import { EditMacroTargetsModal } from './EditMacroTargetsModal';
 import { useMacroTargets } from '@/hooks/useMacroTargets';
@@ -31,7 +32,12 @@ export function NutritionSummary({ nutrition }: NutritionSummaryProps) {
   const fatGoalMet = nutrition.fat < dailyTargets.fat;
 
   const handleSaveTargets = async (newTargets: typeof dailyTargets) => {
-    await updateTargets(newTargets);
+    try {
+      await updateTargets(newTargets);
+      toast.success('Macro targets updated.');
+    } catch {
+      toast.error('Failed to update macro targets. Please try again.');
+    }
   };
 
   return (
