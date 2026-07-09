@@ -144,23 +144,50 @@ export const foodService = {
     });
   },
 
-  async getWeeklySummary(context: GraphQLContext) {
+  async getWeeklySummary(
+    context: GraphQLContext,
+    args: { days?: number | null; startDate?: string | null; endDate?: string | null } = {}
+  ) {
     const userId = requireAuth(context);
 
-    // Build 7 date strings: yesterday back 7 days, in Mountain Time
-    const now = new Date();
+    // Build list of YYYY-MM-DD dates (Mountain Time), most-recent first.
     const dates: string[] = [];
-    for (let i = 1; i <= 7; i++) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - i);
-      const mtDateString = d.toLocaleString('en-US', {
-        timeZone: TIMEZONE,
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      });
-      const [month, day, year] = mtDateString.split('/');
-      dates.push(`${year}-${month}-${day}`);
+    if (args.startDate && args.endDate) {
+      const startParts = args.startDate.split('-').map(Number);
+      const endParts = args.endDate.split('-').map(Number);
+      if (startParts.length !== 3 || endParts.length !== 3 || startParts.some(isNaN) || endParts.some(isNaN)) {
+        throw new Error('startDate and endDate must be YYYY-MM-DD strings');
+      }
+      const [sy, sm, sd] = startParts as [number, number, number];
+      const [ey, em, ed] = endParts as [number, number, number];
+      const start = new Date(sy, sm - 1, sd);
+      const end = new Date(ey, em - 1, ed);
+      if (end < start) {
+        throw new Error('endDate must be on or after startDate');
+      }
+      const iter = new Date(end);
+      while (iter >= start) {
+        const y = iter.getFullYear();
+        const m = String(iter.getMonth() + 1).padStart(2, '0');
+        const d = String(iter.getDate()).padStart(2, '0');
+        dates.push(`${y}-${m}-${d}`);
+        iter.setDate(iter.getDate() - 1);
+      }
+    } else {
+      const days = Math.max(1, Math.min(args.days ?? 7, 90));
+      const now = new Date();
+      for (let i = 1; i <= days; i++) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const mtDateString = d.toLocaleString('en-US', {
+          timeZone: TIMEZONE,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        });
+        const [month, day, year] = mtDateString.split('/');
+        dates.push(`${year}-${month}-${day}`);
+      }
     }
 
     // Single query for the full 7-day range
@@ -180,7 +207,7 @@ export const foodService = {
       orderBy: { createdAt: 'asc' },
     });
 
-    // Pre-populate all 7 days with zeros
+    // Pre-populate all days with zeros
     const summaryMap = new Map<string, { calories: number; protein: number; carbs: number; fat: number }>();
     for (const dateStr of dates) {
       summaryMap.set(dateStr, { calories: 0, protein: 0, carbs: 0, fat: 0 });

@@ -22,8 +22,17 @@ export const DailySummaryType = builder.objectRef<DailySummaryShape>('DailySumma
 builder.queryField('weeklySummary', (t) =>
   t.field({
     type: [DailySummaryType],
-    resolve: async (_parent, _args, context) => {
-      return foodService.getWeeklySummary(context);
+    args: {
+      days: t.arg.int({ required: false }),
+      startDate: t.arg.string({ required: false }),
+      endDate: t.arg.string({ required: false }),
+    },
+    resolve: async (_parent, args, context) => {
+      return foodService.getWeeklySummary(context, {
+        days: args.days,
+        startDate: args.startDate,
+        endDate: args.endDate,
+      });
     },
   })
 );
