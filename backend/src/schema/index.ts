@@ -6,6 +6,7 @@ import './types/NutritionAnalysis';
 import './types/User';
 import './types/MacroTargets';
 import './types/DailySummary';
+import './types/UnreliableDay';
 import './types/Query';
 import './types/Mutation';
 

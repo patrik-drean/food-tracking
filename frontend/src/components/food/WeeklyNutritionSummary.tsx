@@ -5,6 +5,7 @@ import { useQuery } from 'urql';
 import { Card } from '@/components/ui/Card';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { DayFoodLogModal } from './DayFoodLogModal';
+import { getTodayMT } from '@/lib/timezone';
 
 const WEEKLY_SUMMARY_QUERY = `
   query WeeklySummary($days: Int, $startDate: String, $endDate: String) {
@@ -14,6 +15,7 @@ const WEEKLY_SUMMARY_QUERY = `
       protein
       carbs
       fat
+      unreliable
     }
   }
 `;
@@ -24,6 +26,7 @@ interface DailySummary {
   protein: number;
   carbs: number;
   fat: number;
+  unreliable: boolean;
 }
 
 type Period = '7' | '30' | 'custom';
@@ -54,16 +57,6 @@ function computeAverages(summaries: DailySummary[]) {
   };
 }
 
-function todayMTDateStr() {
-  const parts = new Date().toLocaleString('en-US', {
-    timeZone: 'America/Denver',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
-  const [month, day, year] = parts.split('/');
-  return `${year}-${month}-${day}`;
-}
 
 function buildMarkdown(
   summaries: DailySummary[],
@@ -77,18 +70,21 @@ function buildMarkdown(
     .slice()
     .reverse()
     .map((day) => {
+      const marker = day.unreliable ? ' ~' : '';
       const isEmpty = day.calories === 0 && day.protein === 0 && day.carbs === 0 && day.fat === 0;
       if (isEmpty) {
-        return `| ${formatDate(day.date)} | — | — | — | — |`;
+        return `| ${formatDate(day.date)}${marker} | — | — | — | — |`;
       }
-      return `| ${formatDate(day.date)} | ${Math.round(day.calories)} | ${Math.round(
+      return `| ${formatDate(day.date)}${marker} | ${Math.round(day.calories)} | ${Math.round(
         day.protein
       )} | ${Math.round(day.carbs)} | ${Math.round(day.fat)} |`;
     });
   const avgRow = avg
     ? `| **Average** | **${avg.calories}** | **${avg.protein}** | **${avg.carbs}** | **${avg.fat}** |`
     : '';
-  return [header, '', tableHeader, tableDivider, ...rows, avgRow].filter(Boolean).join('\n');
+  const hasUnreliable = summaries.some((d) => d.unreliable);
+  const footnote = hasUnreliable ? '\n\n_~ = rough/incomplete tracking_' : '';
+  return [header, '', tableHeader, tableDivider, ...rows, avgRow].filter(Boolean).join('\n') + footnote;
 }
 
 export function WeeklyNutritionSummary() {
@@ -96,7 +92,7 @@ export function WeeklyNutritionSummary() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [period, setPeriod] = useState<Period>('7');
   const [customStart, setCustomStart] = useState('');
-  const [customEnd, setCustomEnd] = useState(todayMTDateStr());
+  const [customEnd, setCustomEnd] = useState(getTodayMT());
   const [copied, setCopied] = useState(false);
 
   const variables = useMemo(() => {
@@ -110,7 +106,7 @@ export function WeeklyNutritionSummary() {
     period !== 'custom' ||
     (customStart !== '' && customEnd !== '' && customStart <= customEnd);
 
-  const [{ data, fetching, error }] = useQuery({
+  const [{ data, fetching, error }, reexecuteQuery] = useQuery({
     query: WEEKLY_SUMMARY_QUERY,
     variables,
     requestPolicy: 'cache-and-network',
@@ -273,7 +269,12 @@ export function WeeklyNutritionSummary() {
                           onClick={() => setSelectedDate(day.date)}
                           title="Click to view food log"
                         >
-                          <td className="py-2 pr-4 text-gray-700 font-medium">{formatDate(day.date)}</td>
+                          <td className="py-2 pr-4 text-gray-700 font-medium">
+                            {formatDate(day.date)}
+                            {day.unreliable && (
+                              <span className="ml-1 text-amber-500 text-xs" title="Rough/incomplete tracking">~</span>
+                            )}
+                          </td>
                           {isEmpty ? (
                             <>
                               <td className="py-2 px-2 text-right text-gray-400">—</td>
@@ -321,7 +322,12 @@ export function WeeklyNutritionSummary() {
                       className="w-full text-left bg-gray-50 rounded-lg px-4 py-3 hover:bg-blue-50 transition-colors"
                       onClick={() => setSelectedDate(day.date)}
                     >
-                      <p className="text-sm font-medium text-gray-900 mb-1">{formatDate(day.date)}</p>
+                      <p className="text-sm font-medium text-gray-900 mb-1">
+                        {formatDate(day.date)}
+                        {day.unreliable && (
+                          <span className="ml-1 text-amber-500 text-xs">~</span>
+                        )}
+                      </p>
                       {isEmpty ? (
                         <span className="text-xs text-gray-400">No data</span>
                       ) : (
@@ -360,6 +366,7 @@ export function WeeklyNutritionSummary() {
           date={selectedDate}
           isOpen={true}
           onClose={() => setSelectedDate(null)}
+          onUnreliableToggle={() => reexecuteQuery({ requestPolicy: 'network-only' })}
         />
       )}
     </>

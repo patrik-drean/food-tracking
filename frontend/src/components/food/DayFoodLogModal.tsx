@@ -7,6 +7,7 @@ import { Modal } from '@/components/ui/Modal';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { FoodLogItem } from './FoodLogItem';
 import { EditFoodModal } from './EditFoodModal';
+import { useUnreliableDay } from '@/hooks/useUnreliableDay';
 
 const FOODS_BY_DATE_QUERY = `
   query FoodsByDate($date: String!) {
@@ -46,6 +47,7 @@ interface DayFoodLogModalProps {
   date: string; // YYYY-MM-DD
   isOpen: boolean;
   onClose: () => void;
+  onUnreliableToggle?: () => void;
 }
 
 function formatTitle(date: string): string {
@@ -69,8 +71,9 @@ function calculateTotals(foods: Food[]) {
   );
 }
 
-export function DayFoodLogModal({ date, isOpen, onClose }: DayFoodLogModalProps) {
+export function DayFoodLogModal({ date, isOpen, onClose, onUnreliableToggle }: DayFoodLogModalProps) {
   const [editingFood, setEditingFood] = useState<Food | null>(null);
+  const { unreliable, toggle: toggleUnreliable } = useUnreliableDay(date);
 
   const [{ data, fetching, error }, reexecuteQuery] = useQuery({
     query: FOODS_BY_DATE_QUERY,
@@ -106,32 +109,51 @@ export function DayFoodLogModal({ date, isOpen, onClose }: DayFoodLogModalProps)
             </div>
           ) : error ? (
             <p className="text-center text-red-600 py-8">Failed to load food log.</p>
-          ) : foods.length === 0 ? (
-            <p className="text-center text-gray-500 py-8">No food entries logged for this day.</p>
           ) : (
             <>
-              {/* Totals bar */}
-              <div className="flex gap-4 text-sm px-1">
-                <span className="text-nutrition-calories font-medium">
-                  {Math.round(totals.calories).toLocaleString()} cal
-                </span>
-                <span className="text-nutrition-protein">{Math.round(totals.protein)}g P</span>
-                <span className="text-nutrition-carbs">{Math.round(totals.carbs)}g C</span>
-                <span className="text-nutrition-fat">{Math.round(totals.fat)}g F</span>
-                <span className="text-gray-400 ml-auto">{foods.length} {foods.length === 1 ? 'item' : 'items'}</span>
-              </div>
+              {foods.length === 0 ? (
+                <p className="text-center text-gray-500 py-8">No food entries logged for this day.</p>
+              ) : (
+                <>
+                  {/* Totals bar */}
+                  <div className="flex gap-4 text-sm px-1">
+                    <span className="text-nutrition-calories font-medium">
+                      {Math.round(totals.calories).toLocaleString()} cal
+                    </span>
+                    <span className="text-nutrition-protein">{Math.round(totals.protein)}g P</span>
+                    <span className="text-nutrition-carbs">{Math.round(totals.carbs)}g C</span>
+                    <span className="text-nutrition-fat">{Math.round(totals.fat)}g F</span>
+                    <span className="text-gray-400 ml-auto">{foods.length} {foods.length === 1 ? 'item' : 'items'}</span>
+                  </div>
 
-              {/* Food list */}
-              <div className="space-y-2 max-h-[60vh] overflow-y-auto">
-                {foods.map((food) => (
-                  <FoodLogItem
-                    key={food.id}
-                    food={food}
-                    onEdit={() => setEditingFood(food)}
-                    onDelete={() => handleDelete(food.id)}
-                  />
-                ))}
-              </div>
+                  {/* Food list */}
+                  <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+                    {foods.map((food) => (
+                      <FoodLogItem
+                        key={food.id}
+                        food={food}
+                        onEdit={() => setEditingFood(food)}
+                        onDelete={() => handleDelete(food.id)}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+
+              <label className="flex items-center gap-2 px-1 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={unreliable}
+                  onChange={async () => {
+                    await toggleUnreliable();
+                    onUnreliableToggle?.();
+                  }}
+                  className="h-4 w-4 rounded border-gray-300 text-amber-500 focus:ring-amber-500"
+                />
+                <span className={`text-sm ${unreliable ? 'text-amber-600' : 'text-gray-400'}`}>
+                  Rough/incomplete day
+                </span>
+              </label>
             </>
           )}
         </div>

@@ -10,6 +10,8 @@ import { FoodLogItem } from './FoodLogItem';
 import { NutritionSummary } from './NutritionSummary';
 import { EmptyFoodLog } from './EmptyFoodLog';
 import { EditFoodModal } from './EditFoodModal';
+import { useUnreliableDay } from '@/hooks/useUnreliableDay';
+import { getTodayMT } from '@/lib/timezone';
 
 const TODAYS_FOODS_QUERY = `
   query TodaysFoods {
@@ -56,6 +58,8 @@ interface DailyFoodLogProps {
 export function DailyFoodLog({ onRefetchReady }: DailyFoodLogProps) {
   const [editingFood, setEditingFood] = useState<Food | null>(null);
   const [showError, setShowError] = useState(false);
+  const todayDate = getTodayMT();
+  const { unreliable, toggle: toggleUnreliable } = useUnreliableDay(todayDate);
   const [{ data, fetching, error }, reexecuteQuery] = useQuery({
     query: TODAYS_FOODS_QUERY,
     requestPolicy: 'cache-and-network',
@@ -135,6 +139,18 @@ export function DailyFoodLog({ onRefetchReady }: DailyFoodLogProps) {
     <>
       <div className="space-y-4">
         <NutritionSummary nutrition={totalNutrition} />
+
+        <label className="flex items-center gap-2 px-1 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={unreliable}
+            onChange={toggleUnreliable}
+            className="h-4 w-4 rounded border-gray-300 text-amber-500 focus:ring-amber-500"
+          />
+          <span className={`text-sm ${unreliable ? 'text-amber-600' : 'text-gray-400'}`}>
+            Rough/incomplete day
+          </span>
+        </label>
 
         <Card>
           <div className="space-y-1">
